@@ -1,0 +1,16 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/sunshine_blue</item>
+        <item name="colorPrimaryDark">@color/sunshine_dark_blue</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <!-- Main activity theme. -->
+    <style name="ForecastTheme" parent="AppTheme" />
+
+    <style name="ForecastListStyle">
+        <item name="android:choiceMode">singleChoice</item>
+    </style>
+</resources>
