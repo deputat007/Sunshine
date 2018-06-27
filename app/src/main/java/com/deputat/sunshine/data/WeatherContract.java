@@ -14,7 +14,7 @@ public class WeatherContract {
     // relationship between a domain name and its website.  A convenient string to use for the
     // content authority is the package name for the app, which is guaranteed to be unique on the
     // device.
-    public static final String CONTENT_AUTHORITY = "com.example.android.sunshine.app";
+    public static final String CONTENT_AUTHORITY = "com.deputat.android.sunshine.app";
     // Possible paths (appended to base content URI for possible URI's)
     // For instance, content://com.example.android.sunshine.app/weather/ is a valid path for
     // looking at weather data. content://com.example.android.sunshine.app/givemeroot/ will fail,

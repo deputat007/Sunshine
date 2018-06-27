@@ -21,7 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.deputat.sunshine.data.WeatherContract;
-import com.deputat.sunshine.service.SunshineService;
+import com.deputat.sunshine.sync.SunshineSyncAdapter;
 
 import java.util.Objects;
 
@@ -193,8 +193,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void updateWeather() {
-        final String location = Utility.getPreferredLocation(getActivity());
-        SunshineService.startActionWeather(getContext(), location);
+        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     public void setUseTodayLayout(boolean useTodayLayout) {

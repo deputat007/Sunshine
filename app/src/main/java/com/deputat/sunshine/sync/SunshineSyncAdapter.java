@@ -1,18 +1,26 @@
-package com.deputat.sunshine.service;
+package com.deputat.sunshine.sync;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
-import android.app.IntentService;
-import android.content.BroadcastReceiver;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
+import android.content.SyncRequest;
+import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
 
 import com.deputat.sunshine.BuildConfig;
+import com.deputat.sunshine.R;
+import com.deputat.sunshine.Utility;
 import com.deputat.sunshine.data.WeatherContract;
 
 import org.json.JSONArray;
@@ -25,58 +33,118 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Vector;
 
-/**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p>
- * helper methods.
- */
-public class SunshineService extends IntentService {
-    private static final String ACTION_WEATHER =
-            "com.example.android.sunshine.app.service.action.WEATHER";
 
-    private static final String EXTRA_LOCATION =
-            "com.example.android.sunshine.app.service.extra.location";
-    private static final String LOG_TAG = SunshineService.class.getSimpleName();
+public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
+    private static final int SYNC_INTERVAL = 30;
+    private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+    private final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
 
-    public SunshineService() {
-        super("SunshineService");
+    SunshineSyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
     }
 
     /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
+     * Helper method to have the sync adapter sync immediately
      *
-     * @see IntentService
+     * @param context The context used to access the account service
      */
-    public static void startActionWeather(Context context, String location) {
-        Intent intent = new Intent(context, SunshineService.class);
-        intent.setAction(ACTION_WEATHER);
-        intent.putExtra(EXTRA_LOCATION, location);
-        context.startService(intent);
+    public static void syncImmediately(Context context) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(getSyncAccount(context),
+                context.getString(R.string.content_authority), bundle);
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_WEATHER.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_LOCATION);
-                handleActionWeather(param1);
-            }
+    /**
+     * Helper method to schedule the sync adapter periodic execution
+     */
+    private static void configurePeriodicSync(Context context, int syncInterval, int flexTime) {
+        Account account = getSyncAccount(context);
+        String authority = context.getString(R.string.content_authority);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // we can enable inexact timers in our periodic sync
+            SyncRequest request = new SyncRequest.Builder().
+                    syncPeriodic(syncInterval, flexTime).
+                    setSyncAdapter(account, authority).
+                    setExtras(new Bundle()).build();
+            ContentResolver.requestSync(request);
+        } else {
+            ContentResolver.addPeriodicSync(account,
+                    authority, new Bundle(), syncInterval);
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionWeather(String param1) {
+    private static void onAccountCreated(Account newAccount, Context context) {
+        /*
+         * Since we've created an account
+         */
+        SunshineSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
 
+        /*
+         * Without calling setSyncAutomatically, our periodic sync will not be enabled.
+         */
+        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
+
+        /*
+         * Finally, let's do a sync to get things started
+         */
+        syncImmediately(context);
+    }
+
+    public static void initializeSyncAdapter(Context context) {
+        getSyncAccount(context);
+    }
+
+    /**
+     * Helper method to get the fake account to be used with SyncAdapter, or make a new one
+     * if the fake account doesn't exist yet.  If we make a new account, we call the
+     * onAccountCreated method so we can initialize things.
+     *
+     * @param context The context used to access the account service
+     * @return a fake account.
+     */
+    private static Account getSyncAccount(Context context) {
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
+        // Create the account type and default account
+        Account newAccount = new Account(
+                context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+
+        // If the password doesn't exist, the account doesn't exist
+        if (null == Objects.requireNonNull(accountManager).getPassword(newAccount)) {
+
+            /*
+             * Add the account and account type, no password or user data
+             * If successful, return the Account object, otherwise report an error.
+             */
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+                return null;
+            }
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call ContentResolver.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+
+            onAccountCreated(newAccount, context);
+        }
+        return newAccount;
+    }
+
+    @Override
+    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
+        //
+        String location = Utility.getPreferredLocation(getContext());
+
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
@@ -97,10 +165,9 @@ public class SunshineService extends IntentService {
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
             final String APPID_PARAM = "APPID";
-
             Uri builtUri = Uri.parse(FORECAST_BASE_URL)
                     .buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, param1)
+                    .appendQueryParameter(QUERY_PARAM, location)
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
@@ -136,7 +203,7 @@ public class SunshineService extends IntentService {
                 return;
             }
             forecastJsonStr = buffer.toString();
-            getWeatherDataFromJson(forecastJsonStr, param1);
+            getWeatherDataFromJson(forecastJsonStr, location);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
@@ -164,9 +231,9 @@ public class SunshineService extends IntentService {
      * @param lon             the longitude of the city
      * @return the row ID of the added location.
      */
-    long addLocation(String locationSetting, String cityName, double lat, double lon) {
+    private long addLocation(String locationSetting, String cityName, double lat, double lon) {
         // Students: First, check if the location with this city name exists in the db
-        @SuppressLint("Recycle") Cursor cursor = getContentResolver()
+        @SuppressLint("Recycle") Cursor cursor = getContext().getContentResolver()
                 .query(WeatherContract.LocationEntry.CONTENT_URI,
                         new String[]{WeatherContract.LocationEntry._ID},
                         WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
@@ -185,7 +252,7 @@ public class SunshineService extends IntentService {
             contentValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, lon);
 
             final Uri insertedUri =
-                    getContentResolver().insert(WeatherContract.LocationEntry.CONTENT_URI,
+                    getContext().getContentResolver().insert(WeatherContract.LocationEntry.CONTENT_URI,
                             contentValues);
             return ContentUris.parseId(insertedUri);
         }
@@ -326,7 +393,7 @@ public class SunshineService extends IntentService {
                 // Student: call bulkInsert to add the weatherEntries to the database here
                 ContentValues[] contentValues = new ContentValues[cVVector.size()];
                 cVVector.toArray(contentValues);
-                inserted = getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI,
+                inserted = getContext().getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI,
                         contentValues);
             }
 
@@ -334,14 +401,6 @@ public class SunshineService extends IntentService {
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
-        }
-    }
-
-    public static class AlarmReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
         }
     }
 }

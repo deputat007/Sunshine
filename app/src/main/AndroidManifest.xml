@@ -4,6 +4,9 @@
 
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
@@ -44,15 +47,32 @@
 
         <provider
             android:name=".data.WeatherProvider"
-            android:authorities="com.example.android.sunshine.app"
+            android:authorities="com.deputat.android.sunshine.app"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:syncable="true" />
 
         <service
-            android:name=".service.SunshineService"
-            android:exported="false" />
-        <receiver
-            android:name=".service.SunshineService$AlarmReceiver"
-            android:enabled="true" />
+            android:name=".sync.SunshineSyncService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <service
+            android:name=".sync.SunshineAuthenticatorService"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
     </application>
 </manifest>
