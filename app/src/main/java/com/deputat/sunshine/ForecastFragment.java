@@ -1,6 +1,7 @@
 package com.deputat.sunshine;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,6 +66,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @SuppressWarnings("unused")
     static final int COL_COORD_LONG = 8;
     private static final String KEY_POSITION = "KEY_POSITION";
+    private static final String TAG = ForecastFragment.class.getSimpleName();
 
     private ForecastAdapter adapter;
     private ListView listView;
@@ -94,8 +97,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh:
-                updateWeather();
+            case R.id.action_map:
+                openPreferredLocationInMap();
                 return true;
 
             default:
@@ -194,6 +197,27 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void updateWeather() {
         SunshineSyncAdapter.syncImmediately(getActivity());
+    }
+
+    private void openPreferredLocationInMap() {
+        Cursor cursor = adapter.getCursor();
+
+        if (cursor != null && cursor.moveToPosition(0)) {
+
+            String posLat = Objects.requireNonNull(cursor).getString(COL_COORD_LAT);
+            String posLong = cursor.getString(COL_COORD_LONG);
+
+            Uri uri = Uri.parse("geo:" + posLat + "," + posLong);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            if (intent.resolveActivity(Objects.requireNonNull(
+                    getActivity()).getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                Log.d(TAG, "Couldn't call " + uri.toString() + ", no receiving apps installed!");
+            }
+        }
     }
 
     public void setUseTodayLayout(boolean useTodayLayout) {

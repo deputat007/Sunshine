@@ -420,6 +420,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 inserted = getContext().getContentResolver()
                         .bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, contentValues);
 
+                getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                        WeatherContract.WeatherEntry.COLUMN_DATE + " <= ?",
+                        new String[]{Long.toString(dayTime.setJulianDay(julianStartDay - 1))});
+
                 notifyWeather();
             }
 
@@ -433,8 +437,15 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     @SuppressWarnings("deprecation")
     private void notifyWeather() {
         Context context = getContext();
-        //checking the last update and notify if it' the first of the day
+        String enableNotificationKey = context.getString(R.string.pref_enable_notifications_key);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean enableNotification = prefs.getBoolean(enableNotificationKey, true);
+
+        if (!enableNotification) {
+            return;
+        }
+
+        //checking the last update and notify if it' the first of the day
         String lastNotificationKey = context.getString(R.string.pref_last_notification);
         long lastSync = prefs.getLong(lastNotificationKey, 0);
 
@@ -482,18 +493,19 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                                 .setContentIntent(pendingIntent);
 
-                //refreshing last sync
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putLong(lastNotificationKey, System.currentTimeMillis());
-                editor.apply();
-
                 final NotificationManagerCompat notificationManager =
                         NotificationManagerCompat.from(getContext());
 
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(WEATHER_NOTIFICATION_ID, mBuilder.build());
-            }
-        }
 
+                //refreshing last sync
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong(lastNotificationKey, System.currentTimeMillis());
+                editor.apply();
+            }
+            cursor.close();
+        }
     }
+
 }

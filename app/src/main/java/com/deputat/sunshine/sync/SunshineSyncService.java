@@ -14,7 +14,8 @@ public class SunshineSyncService extends Service {
         Log.d("SunshineSyncService", "onCreate - SunshineSyncService");
         synchronized (sSyncAdapterLock) {
             if (sSunshineSyncAdapter == null) {
-                sSunshineSyncAdapter = new SunshineSyncAdapter(getApplicationContext(), true);
+                sSunshineSyncAdapter = new SunshineSyncAdapter(getApplicationContext(),
+                        true);
             }
         }
     }

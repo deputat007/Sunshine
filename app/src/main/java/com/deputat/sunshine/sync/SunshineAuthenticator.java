@@ -30,30 +30,21 @@ public class SunshineAuthenticator extends AbstractAccountAuthenticator {
     // Because we're not actually adding an account to the device, just return null.
     @Override
     public Bundle addAccount(
-            AccountAuthenticatorResponse r,
-            String s,
-            String s2,
-            String[] strings,
-            Bundle bundle) {
+            AccountAuthenticatorResponse r, String s, String s2, String[] strings, Bundle bundle) {
         return null;
     }
 
     // Ignore attempts to confirm credentials
     @Override
-    public Bundle confirmCredentials(
-            AccountAuthenticatorResponse r,
-            Account account,
-            Bundle bundle) {
+    public Bundle confirmCredentials(AccountAuthenticatorResponse r, Account account,
+                                     Bundle bundle) {
         return null;
     }
 
     // Getting an authentication token is not supported
     @Override
-    public Bundle getAuthToken(
-            AccountAuthenticatorResponse r,
-            Account account,
-            String s,
-            Bundle bundle) {
+    public Bundle getAuthToken(AccountAuthenticatorResponse r, Account account, String s,
+                               Bundle bundle) {
         throw new UnsupportedOperationException();
     }
 
@@ -65,18 +56,14 @@ public class SunshineAuthenticator extends AbstractAccountAuthenticator {
 
     // Updating user credentials is not supported
     @Override
-    public Bundle updateCredentials(
-            AccountAuthenticatorResponse r,
-            Account account,
-            String s, Bundle bundle) {
+    public Bundle updateCredentials(AccountAuthenticatorResponse r, Account account, String s,
+                                    Bundle bundle) {
         throw new UnsupportedOperationException();
     }
 
     // Checking features for the account is not supported
     @Override
-    public Bundle hasFeatures(
-            AccountAuthenticatorResponse r,
-            Account account, String[] strings) {
+    public Bundle hasFeatures(AccountAuthenticatorResponse r, Account account, String[] strings) {
         throw new UnsupportedOperationException();
     }
 }
