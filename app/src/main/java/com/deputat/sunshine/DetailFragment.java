@@ -26,6 +26,9 @@ import android.widget.TextView;
 
 import com.deputat.sunshine.data.WeatherContract;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.Objects;
 
 
@@ -59,7 +62,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
             // This works because the WeatherProvider returns location data joined with
             // weather data, even though they're stored in two different tables.
-            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+            WeatherContract.LocationEntry.COLUMN_CITY_ID
     };
     private static final String TAG = DetailFragment.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
@@ -114,6 +117,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.detail, menu);
@@ -165,8 +180,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         String weatherDescription = data.getString(COL_WEATHER_DESC);
         descriptionView.setText(weatherDescription);
 
-        boolean isMetric = Utility.isMetric(getActivity());
-
         String high =
                 Utility.formatTemperature(getContext(), data.getDouble(COL_WEATHER_MAX_TEMP)
                 );
@@ -200,7 +213,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "unused"})
+    @Subscribe
     public void onLocationChanged(String location) {
         if (this.uri != null) {
             long date = WeatherContract.WeatherEntry.getDateFromUri(this.uri);

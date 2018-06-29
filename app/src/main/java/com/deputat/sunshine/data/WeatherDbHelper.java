@@ -27,7 +27,7 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + WeatherContract.LocationEntry.COLUMN_CITY_NAME
                 + " TEXT NOT NULL, "
-                + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+                + WeatherContract.LocationEntry.COLUMN_CITY_ID
                 + " TEXT UNIQUE NOT NULL,"
                 + WeatherContract.LocationEntry.COLUMN_COORD_LAT
                 + " REAL NOT NULL, "

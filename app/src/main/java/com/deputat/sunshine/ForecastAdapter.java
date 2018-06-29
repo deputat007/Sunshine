@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.deputat.sunshine.data.WeatherContract;
+
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link Cursor} to a {@link android.widget.ListView}.
@@ -78,6 +80,7 @@ public class ForecastAdapter extends CursorAdapter {
         switch (getItemViewType(cursor.getPosition())) {
             case VIEW_TYPE_TODAY:
                 icon = Utility.getArtResourceForWeatherCondition(weatherConditionId);
+                updateCityName(viewHolder, context);
                 break;
             case VIEW_TYPE_FUTURE_DAY:
                 icon = Utility.getIconResourceForWeatherCondition(weatherConditionId);
@@ -100,6 +103,23 @@ public class ForecastAdapter extends CursorAdapter {
         viewHolder.lowView.setText(Utility.formatTemperature(context, low));
     }
 
+    private void updateCityName(ViewHolder viewHolder, Context context) {
+        final Cursor cursor = context.getContentResolver()
+                .query(WeatherContract.LocationEntry.CONTENT_URI,
+                        new String[]{WeatherContract.LocationEntry.COLUMN_CITY_NAME},
+                        WeatherContract.LocationEntry.COLUMN_CITY_ID + " == ? ",
+                        new String[]{Utility.getLocationId(context)}, null);
+
+        if (cursor != null && cursor.moveToPosition(0)) {
+            viewHolder.cityName.setVisibility(View.VISIBLE);
+            viewHolder.cityName.setText(cursor.getString(0));
+
+            cursor.close();
+        } else {
+            viewHolder.cityName.setVisibility(View.GONE);
+        }
+    }
+
     public void setUseTodayLayout(boolean useTodayLayout) {
         this.useTodayLayout = useTodayLayout;
     }
@@ -107,6 +127,7 @@ public class ForecastAdapter extends CursorAdapter {
     public static class ViewHolder {
         final ImageView iconView;
         final TextView dateView;
+        final TextView cityName;
         final TextView forecastView;
         final TextView highView;
         final TextView lowView;
@@ -114,6 +135,7 @@ public class ForecastAdapter extends CursorAdapter {
         ViewHolder(View view) {
             iconView = view.findViewById(R.id.list_item_icon);
             dateView = view.findViewById(R.id.list_item_date_textview);
+            cityName = view.findViewById(R.id.list_item_city_name);
             forecastView = view.findViewById(R.id.list_item_forecast_textview);
             highView = view.findViewById(R.id.list_item_high_textview);
             lowView = view.findViewById(R.id.list_item_low_textview);

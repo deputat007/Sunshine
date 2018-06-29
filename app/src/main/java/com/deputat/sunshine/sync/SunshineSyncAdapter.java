@@ -167,7 +167,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
         //
-        String location = Utility.getPreferredLocation(getContext());
+        String lon = Utility.getCoordLon(getContext());
+        String lat = Utility.getCoordLat(getContext());
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -184,14 +185,16 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             // Possible parameters are avaiable at OWM's forecast API page, at
             // http://openweathermap.org/API#forecast
             final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
-            final String QUERY_PARAM = "q";
+            final String LON_PARAM = "lon";
+            final String LAT_PARAM = "lat";
             final String FORMAT_PARAM = "mode";
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
             final String APPID_PARAM = "APPID";
             Uri builtUri = Uri.parse(FORECAST_BASE_URL)
                     .buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, location)
+                    .appendQueryParameter(LON_PARAM, lon)
+                    .appendQueryParameter(LAT_PARAM, lat)
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
@@ -199,6 +202,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                     .build();
 
             URL url = new URL(builtUri.toString());
+            Log.d(LOG_TAG, builtUri.toString());
 
             // Create the request to OpenWeatherMap, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -227,7 +231,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 return;
             }
             forecastJsonStr = buffer.toString();
-            getWeatherDataFromJson(forecastJsonStr, location);
+            getWeatherDataFromJson(forecastJsonStr);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
@@ -260,7 +264,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         @SuppressLint("Recycle") Cursor cursor = getContext().getContentResolver()
                 .query(WeatherContract.LocationEntry.CONTENT_URI,
                         new String[]{WeatherContract.LocationEntry._ID},
-                        WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                        WeatherContract.LocationEntry.COLUMN_CITY_ID + " = ?",
                         new String[]{locationSetting}, null);
         if (cursor != null && cursor.moveToFirst()) {
             int locationIdIndex = cursor.getColumnIndex(WeatherContract.LocationEntry._ID);
@@ -269,15 +273,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             // If it exists, return the current ID
             // Otherwise, insert it using the content resolver and the base URI
             final ContentValues contentValues = new ContentValues(1);
-            contentValues.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+            contentValues.put(WeatherContract.LocationEntry.COLUMN_CITY_ID,
                     locationSetting);
             contentValues.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, cityName);
             contentValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, lat);
             contentValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, lon);
 
-            final Uri insertedUri =
-                    getContext().getContentResolver()
-                            .insert(WeatherContract.LocationEntry.CONTENT_URI, contentValues);
+            final Uri insertedUri = getContext().getContentResolver()
+                    .insert(WeatherContract.LocationEntry.CONTENT_URI, contentValues);
             return ContentUris.parseId(insertedUri);
         }
     }
@@ -289,7 +292,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    private void getWeatherDataFromJson(String forecastJsonStr, String locationSetting) {
+    private void getWeatherDataFromJson(String forecastJsonStr) {
 
         // Now we have a String representing the complete forecast in JSON Format.
         // Fortunately parsing is easy:  constructor takes the JSON string and converts it
@@ -298,6 +301,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         // These are the names of the JSON objects that need to be extracted.
 
         // Location information
+        final String OWM_CITY_ID = "id";
         final String OWM_CITY = "city";
         final String OWM_CITY_NAME = "name";
         final String OWM_COORD = "coord";
@@ -328,13 +332,18 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
             JSONObject cityJson = forecastJson.getJSONObject(OWM_CITY);
+
+            String cityId = cityJson.getString(OWM_CITY_ID);
             String cityName = cityJson.getString(OWM_CITY_NAME);
 
             JSONObject cityCoord = cityJson.getJSONObject(OWM_COORD);
             double cityLatitude = cityCoord.getDouble(OWM_LATITUDE);
             double cityLongitude = cityCoord.getDouble(OWM_LONGITUDE);
-
-            long locationId = addLocation(locationSetting, cityName, cityLatitude, cityLongitude);
+            long locationId = addLocation(cityId, cityName, cityLatitude, cityLongitude);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                    .putString(getContext().getString(R.string.pref_location_id),
+                            String.valueOf(cityId))
+                    .apply();
 
             // Insert the new weather information into the database
             Vector<ContentValues> cVVector = new Vector<>(weatherArray.length());
@@ -451,7 +460,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if (System.currentTimeMillis() - lastSync >= DAY_IN_MILLIS) {
             // Last sync was more than 1 day ago, let's send a notification with the weather.
-            String locationQuery = Utility.getPreferredLocation(context);
+            String locationQuery = Utility.getLocationId(context);
 
             Uri weatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationQuery,
                     System.currentTimeMillis());

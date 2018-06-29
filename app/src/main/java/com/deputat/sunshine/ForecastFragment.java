@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +24,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.events.LocationChangedEvent;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
 
@@ -46,7 +51,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
             WeatherContract.WeatherEntry.COLUMN_DATE, WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+            WeatherContract.LocationEntry.COLUMN_CITY_ID,
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
             WeatherContract.LocationEntry.COLUMN_COORD_LAT,
             WeatherContract.LocationEntry.COLUMN_COORD_LONG
@@ -69,6 +74,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private static final String TAG = ForecastFragment.class.getSimpleName();
 
     private ForecastAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private ListView listView;
 
     private int position = ListView.INVALID_POSITION;
@@ -107,6 +113,18 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -114,6 +132,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = rootView.findViewById(R.id.listview_forecast);
+        swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setColorSchemeResources(R.color.sunshine_light_blue,
+                R.color.sunshine_blue, R.color.sunshine_dark_blue);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -124,12 +145,19 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    String locationSetting = Utility.getPreferredLocation(getActivity());
+                    String locationSetting = Utility.getLocationId(getActivity());
                     ((MainActivity) Objects.requireNonNull(getActivity())).onItemSelected(
                             WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting,
                                     cursor.getLong(COL_WEATHER_DATE)));
                 }
                 ForecastFragment.this.position = position;
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateWeather();
             }
         });
 
@@ -152,7 +180,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @NonNull
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String locationSetting = Utility.getPreferredLocation(getActivity());
+        String locationSetting = Utility.getLocationId(getActivity());
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
         Uri weatherForLocationUri =
                 WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(locationSetting,
@@ -167,6 +195,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
                                Cursor data) {
         adapter.swapCursor(data);
+        swipeRefreshLayout.setRefreshing(false);
 
         if (position != ListView.INVALID_POSITION) {
             listView.smoothScrollToPosition(position);
@@ -187,10 +216,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
         adapter.swapCursor(null);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
-    @SuppressWarnings("deprecation")
-    void onLocationChanged() {
+    @SuppressWarnings({"deprecation", "unused"})
+    @Subscribe
+    void onLocationChanged(LocationChangedEvent locationChangedEvent) {
         updateWeather();
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }

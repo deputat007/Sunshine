@@ -19,19 +19,33 @@ public class Utility {
     // back into date objects for comparison/processing.
     private static final String DATE_FORMAT = "yyyyMMdd";
 
-    public static String getPreferredLocation(Context context) {
+    public static String getLocationId(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(context.getString(R.string.pref_location_key),
-                context.getString(R.string.pref_location_default));
+        return prefs.getString(context.getString(R.string.pref_location_id),
+                context.getString(R.string.pref_location_id_default));
     }
 
-    public static boolean isMetric(Context context) {
+    public static String getCoordLon(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(context.getString(R.string.pref_coord_lon),
+                context.getString(R.string.pref_coord_lon_default));
+    }
+
+    public static String getCoordLat(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(context.getString(R.string.pref_coord_lat),
+                context.getString(R.string.pref_coord_lat_default));
+    }
+
+
+    private static boolean isMetric(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_units_key),
                 context.getString(R.string.pref_units_metric))
                 .equals(context.getString(R.string.pref_units_metric));
     }
 
+    @SuppressLint("StringFormatInvalid")
     public static String formatTemperature(Context context, double temperature) {
         // Data stored in Celsius by default.  If user prefers to see in Fahrenheit, convert
         // the values here.
@@ -56,7 +70,7 @@ public class Utility {
      * @param dateInMillis The date in milliseconds
      * @return a user-friendly representation of the date.
      */
-    @SuppressLint("StringFormatMatches")
+    @SuppressLint({"StringFormatMatches", "StringFormatInvalid"})
     public static String getFriendlyDayString(Context context,
                                               long dateInMillis) {
         // The day string for forecast uses the following logic:

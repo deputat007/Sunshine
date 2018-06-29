@@ -52,7 +52,7 @@ public class WeatherContract {
                         PATH_LOCATION;
         public static final String TABLE_NAME = "location";
 
-        public static final String COLUMN_LOCATION_SETTING = "location_setting";
+        public static final String COLUMN_CITY_ID = "city_id";
 
         public static final String COLUMN_CITY_NAME = "city_name";
 

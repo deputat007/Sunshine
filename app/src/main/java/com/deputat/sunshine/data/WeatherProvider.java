@@ -26,13 +26,13 @@ public class WeatherProvider extends ContentProvider {
     //location.location_setting = ?
     private static final String sLocationSettingSelection = WeatherContract.LocationEntry.TABLE_NAME
             + "."
-            + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+            + WeatherContract.LocationEntry.COLUMN_CITY_ID
             + " = ? ";
     //location.location_setting = ? AND date >= ?
     private static final String sLocationSettingWithStartDateSelection =
             WeatherContract.LocationEntry.TABLE_NAME
                     + "."
-                    + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+                    + WeatherContract.LocationEntry.COLUMN_CITY_ID
                     + " = ? AND "
                     + WeatherContract.WeatherEntry.COLUMN_DATE
                     + " >= ? ";
@@ -40,7 +40,7 @@ public class WeatherProvider extends ContentProvider {
     private static final String sLocationSettingAndDaySelection =
             WeatherContract.LocationEntry.TABLE_NAME
                     + "."
-                    + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+                    + WeatherContract.LocationEntry.COLUMN_CITY_ID
                     + " = ? AND "
                     + WeatherContract.WeatherEntry.COLUMN_DATE
                     + " = ? ";
