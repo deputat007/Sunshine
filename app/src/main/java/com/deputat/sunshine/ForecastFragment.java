@@ -32,22 +32,10 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
 
-
-/**
- * A placeholder fragment containing a simple view.
- *
- * @author Andriy Deputat on 05.01.18.
- */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final int FORECAST_LOADER = 101;
     static final String[] FORECAST_COLUMNS = {
-            // In this case the id needs to be fully qualified with a table name, since
-            // the content provider joins the location & weather tables in the background
-            // (both have an _id column)
-            // On the one hand, that's annoying.  On the other, you can search the weather table
-            // using the location set by the user, which is only in the Location table.
-            // So the convenience is worth it.
             WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
             WeatherContract.WeatherEntry.COLUMN_DATE, WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
@@ -56,8 +44,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherContract.LocationEntry.COLUMN_COORD_LAT,
             WeatherContract.LocationEntry.COLUMN_COORD_LONG
     };
-    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
-    // must change.
+
     static final int COL_WEATHER_ID = 0;
     static final int COL_WEATHER_DATE = 1;
     static final int COL_WEATHER_DESC = 2;
@@ -70,6 +57,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_COORD_LAT = 7;
     @SuppressWarnings("unused")
     static final int COL_COORD_LONG = 8;
+
     private static final String KEY_POSITION = "KEY_POSITION";
     private static final String TAG = ForecastFragment.class.getSimpleName();
 
@@ -130,7 +118,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         adapter = new ForecastAdapter(getContext(), null, 0);
 
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = rootView.findViewById(R.id.listview_forecast);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setColorSchemeResources(R.color.sunshine_light_blue,
@@ -141,9 +129,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             @TargetApi(Build.VERSION_CODES.KITKAT)
             @Override
             public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                // CursorAdapter returns a cursor at the correct position for getItem(), or null
-                // if it cannot seek to that position.
-                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                final Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
                     String locationSetting = Utility.getLocationId(getActivity());
                     ((MainActivity) Objects.requireNonNull(getActivity())).onItemSelected(
@@ -180,9 +166,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @NonNull
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String locationSetting = Utility.getLocationId(getActivity());
-        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri =
+        final String locationSetting = Utility.getLocationId(getActivity());
+        final String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        final Uri weatherForLocationUri =
                 WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(locationSetting,
                         System.currentTimeMillis());
 
@@ -231,16 +217,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void openPreferredLocationInMap() {
-        Cursor cursor = adapter.getCursor();
+        final Cursor cursor = adapter.getCursor();
 
         if (cursor != null && cursor.moveToPosition(0)) {
 
-            String posLat = Objects.requireNonNull(cursor).getString(COL_COORD_LAT);
-            String posLong = cursor.getString(COL_COORD_LONG);
+            final String posLat = Objects.requireNonNull(cursor).getString(COL_COORD_LAT);
+            final String posLong = cursor.getString(COL_COORD_LONG);
 
-            Uri uri = Uri.parse("geo:" + posLat + "," + posLong);
+            final Uri uri = Uri.parse("geo:" + posLat + "," + posLong);
 
-            Intent intent = new Intent(Intent.ACTION_VIEW);
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(uri);
             if (intent.resolveActivity(Objects.requireNonNull(
                     getActivity()).getPackageManager()) != null) {
@@ -255,15 +241,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         adapter.setUseTodayLayout(useTodayLayout);
     }
 
-    /**
-     * A callback interface that all activities containing this fragment must
-     * implement. This mechanism allows activities to be notified of item
-     * selections.
-     */
     public interface Callback {
-        /**
-         * DetailFragmentCallback for when an item has been selected.
-         */
         @SuppressWarnings("unused")
         void onItemSelected(Uri dateUri);
     }

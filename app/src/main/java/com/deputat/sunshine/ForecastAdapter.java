@@ -12,12 +12,6 @@ import android.widget.TextView;
 
 import com.deputat.sunshine.data.WeatherContract;
 
-/**
- * {@link ForecastAdapter} exposes a list of weather forecasts
- * from a {@link Cursor} to a {@link android.widget.ListView}.
- *
- * @author Andriy Deputat on 26.01.18.
- */
 public class ForecastAdapter extends CursorAdapter {
 
     private static final int VIEW_TYPE_TODAY = 0;
@@ -39,13 +33,9 @@ public class ForecastAdapter extends CursorAdapter {
         return VIEW_TYPE_COUNT;
     }
 
-    /**
-     * Copy/paste note: Replace existing newView() method in ForecastAdapter with this one.
-     */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        // Choose the layout type
-        int viewType = getItemViewType(cursor.getPosition());
+        final int viewType = getItemViewType(cursor.getPosition());
         int layoutId = -1;
         switch (viewType) {
             case VIEW_TYPE_TODAY:
@@ -55,26 +45,18 @@ public class ForecastAdapter extends CursorAdapter {
                 layoutId = R.layout.list_item_forecast;
                 break;
         }
-        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        final View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
 
         final ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
         return view;
     }
 
-    /*
-        This is where we fill-in the views with the contents of the cursor.
-     */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        // our view is pretty simple here --- just a text view
-        // we'll keep the UI functional with a simple (and slow!) binding.
         final ViewHolder viewHolder = ((ViewHolder) view.getTag());
-        // Read weather icon ID from cursor
-        @SuppressWarnings("unused")
-        int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_ID);
-        // Use placeholder image for now
-        int weatherConditionId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
+        @SuppressWarnings("unused") final int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_ID);
+        final int weatherConditionId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
 
         @DrawableRes int icon = -1;
         switch (getItemViewType(cursor.getPosition())) {
@@ -88,18 +70,16 @@ public class ForecastAdapter extends CursorAdapter {
         }
         viewHolder.iconView.setImageResource(icon);
 
-        long date = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
+        final long date = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
         viewHolder.dateView.setText(Utility.getFriendlyDayString(context, date));
 
-        String forecast = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
+        final String forecast = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
         viewHolder.forecastView.setText(forecast);
-        // Read user preference for metric or imperial temperature units
 
-        // Read high temperature from cursor
-        double high = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
+        final double high = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
         viewHolder.highView.setText(Utility.formatTemperature(context, high));
 
-        double low = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
+        final double low = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
         viewHolder.lowView.setText(Utility.formatTemperature(context, low));
     }
 

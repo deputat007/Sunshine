@@ -25,9 +25,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
 
-/**
- * @author Andriy Deputat on 05.01.18.
- */
 public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
     public static final String KEY_TWO_PANE = "KEY_TWO_PANE";
@@ -64,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         final ForecastFragment forecastFragment =
                 (ForecastFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_forecast);
-        Bundle arguments = new Bundle();
+        final Bundle arguments = new Bundle();
         arguments.putBoolean(KEY_TWO_PANE, twoPane);
 
         Objects.requireNonNull(forecastFragment).setArguments(arguments);
@@ -85,14 +82,14 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
                         PERMISSIONS_REQUEST_LOCATION);
             }
         } else {
-            FusedLocationProviderClient fusedLocationClient =
+            final FusedLocationProviderClient fusedLocationClient =
                     LocationServices.getFusedLocationProviderClient(this);
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
-                                SharedPreferences preferences = PreferenceManager
+                                final SharedPreferences preferences = PreferenceManager
                                         .getDefaultSharedPreferences(MainActivity.this);
                                 preferences.edit()
                                         .putString(getString(R.string.pref_coord_lat),
@@ -100,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
                                         .putString(getString(R.string.pref_coord_lon),
                                                 String.valueOf(location.getLongitude()))
                                         .apply();
-                                String locationId = preferences.getString(
+                                final String locationId = preferences.getString(
                                         getString(R.string.pref_location_id),
                                         getString(R.string.pref_location_id_default));
 
@@ -129,11 +126,12 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String units = preferences.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_label_metric));
+        final SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        final String units = preferences.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_label_metric));
 
         if (!units.equals(this.units)) {
-            String locationId = preferences.getString(
+            final String locationId = preferences.getString(
                     getString(R.string.pref_location_id),
                     getString(R.string.pref_location_id_default));
 
@@ -143,19 +141,14 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
@@ -167,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     @Override
     public void onItemSelected(Uri dateUri) {
         if (twoPane) {
-            DetailFragment detailFragment = new DetailFragment();
-            Bundle arguments = new Bundle();
+            final DetailFragment detailFragment = new DetailFragment();
+            final Bundle arguments = new Bundle();
             arguments.putParcelable(DetailFragment.DETAIL_URI, dateUri);
             detailFragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

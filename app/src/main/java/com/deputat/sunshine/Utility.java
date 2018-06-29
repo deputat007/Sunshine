@@ -11,35 +11,32 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * @author Andriy Deputat on 26.01.18.
- */
 public class Utility {
-    // Format used for storing dates in the database.  ALso used for converting those strings
-    // back into date objects for comparison/processing.
-    private static final String DATE_FORMAT = "yyyyMMdd";
-
     public static String getLocationId(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
         return prefs.getString(context.getString(R.string.pref_location_id),
                 context.getString(R.string.pref_location_id_default));
     }
 
     public static String getCoordLon(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
         return prefs.getString(context.getString(R.string.pref_coord_lon),
                 context.getString(R.string.pref_coord_lon_default));
     }
 
     public static String getCoordLat(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
         return prefs.getString(context.getString(R.string.pref_coord_lat),
                 context.getString(R.string.pref_coord_lat_default));
     }
 
 
     private static boolean isMetric(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
         return prefs.getString(context.getString(R.string.pref_units_key),
                 context.getString(R.string.pref_units_metric))
                 .equals(context.getString(R.string.pref_units_metric));
@@ -47,109 +44,81 @@ public class Utility {
 
     @SuppressLint("StringFormatInvalid")
     public static String formatTemperature(Context context, double temperature) {
-        // Data stored in Celsius by default.  If user prefers to see in Fahrenheit, convert
-        // the values here.
         if (!isMetric(context)) {
             temperature = (temperature * 1.8) + 32;
         }
-        // For presentation, assume the user doesn't care about tenths of a degree.
+
         return String.format(context.getString(R.string.format_temperature), temperature);
     }
 
     @SuppressWarnings("unused")
     static String formatDate(long dateInMillis) {
-        Date date = new Date(dateInMillis);
+        final Date date = new Date(dateInMillis);
+
         return DateFormat.getDateInstance().format(date);
     }
 
-    /**
-     * Helper method to convert the database representation of the date into something to display
-     * to users.  As classy and polished a user experience as "20140102" is, we can do better.
-     *
-     * @param context      Context to use for resource localization
-     * @param dateInMillis The date in milliseconds
-     * @return a user-friendly representation of the date.
-     */
     @SuppressLint({"StringFormatMatches", "StringFormatInvalid"})
     public static String getFriendlyDayString(Context context,
                                               long dateInMillis) {
-        // The day string for forecast uses the following logic:
-        // For today: "Today, June 8"
-        // For tomorrow:  "Tomorrow"
-        // For the next 5 days: "Wednesday" (just the day name)
-        // For all days after that: "Mon Jun 8"
-
-        Time time = new Time();
+        final Time time = new Time();
         time.setToNow();
-        long currentTime = System.currentTimeMillis();
-        int julianDay = Time.getJulianDay(dateInMillis, time.gmtoff);
-        int currentJulianDay = Time.getJulianDay(currentTime, time.gmtoff);
 
-        // If the date we're building the String for is today's date, the format
-        // is "Today, June 24"
+        final long currentTime = System.currentTimeMillis();
+        final int julianDay = Time.getJulianDay(dateInMillis, time.gmtoff);
+        final int currentJulianDay = Time.getJulianDay(currentTime, time.gmtoff);
+
         if (julianDay == currentJulianDay) {
-            String today = context.getString(R.string.today);
-            int formatId = R.string.format_full_friendly_date;
+            final String today = context.getString(R.string.today);
+            final int formatId = R.string.format_full_friendly_date;
+
             return context.getString(formatId, today, getFormattedMonthDay(context, dateInMillis));
         } else if (julianDay < currentJulianDay + 7) {
-            // If the input date is less than a week in the future, just return the day name.
             return getDayName(context, dateInMillis);
         } else {
-            // Otherwise, use the form "Mon Jun 3"
-            SimpleDateFormat shortenedDateFormat =
+            final SimpleDateFormat shortenedDateFormat =
                     new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+
             return shortenedDateFormat.format(dateInMillis);
         }
     }
 
-    /**
-     * Given a day, returns just the name to use for that day.
-     * E.g "today", "tomorrow", "wednesday".
-     *
-     * @param context      Context to use for resource localization
-     * @param dateInMillis The date in milliseconds
-     */
     public static String getDayName(Context context, long dateInMillis) {
-        // If the date is today, return the localized version of "Today" instead of the actual
-        // day name.
-
-        Time t = new Time();
+        final Time t = new Time();
         t.setToNow();
-        int julianDay = Time.getJulianDay(dateInMillis, t.gmtoff);
-        int currentJulianDay = Time.getJulianDay(System.currentTimeMillis(), t.gmtoff);
+
+        final int julianDay = Time.getJulianDay(dateInMillis, t.gmtoff);
+        final int currentJulianDay = Time.getJulianDay(System.currentTimeMillis(), t.gmtoff);
+
         if (julianDay == currentJulianDay) {
             return context.getString(R.string.today);
         } else if (julianDay == currentJulianDay + 1) {
             return context.getString(R.string.tomorrow);
         } else {
-            Time time = new Time();
+            final Time time = new Time();
+
             time.setToNow();
-            // Otherwise, the format is just the day of the week (e.g "Wednesday".
-            SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
+
+            final SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
+
             return dayFormat.format(dateInMillis);
         }
     }
 
-    /**
-     * Converts db date format to the format "Month day", e.g "June 24".
-     *
-     * @param context      Context to use for resource localization
-     * @param dateInMillis The db formatted date string, expected to be of the form specified
-     *                     in Utility.DATE_FORMAT
-     * @return The day in the form of a string formatted "December 6"
-     */
     public static String getFormattedMonthDay(@SuppressWarnings("unused") Context context,
                                               long dateInMillis) {
-        Time time = new Time();
+        final Time time = new Time();
+
         time.setToNow();
-        @SuppressWarnings("unused")
-        SimpleDateFormat dbDateFormat = new SimpleDateFormat(Utility.DATE_FORMAT, Locale.getDefault());
-        SimpleDateFormat monthDayFormat = new SimpleDateFormat("MMMM dd", Locale.getDefault());
+        final SimpleDateFormat monthDayFormat =
+                new SimpleDateFormat("MMMM dd", Locale.getDefault());
+
         return monthDayFormat.format(dateInMillis);
     }
 
     public static String getFormattedWind(Context context, double windSpeed, double degrees) {
         int windFormat;
+
         if (Utility.isMetric(context)) {
             windFormat = R.string.format_wind_kmh;
         } else {
@@ -157,9 +126,6 @@ public class Utility {
             windSpeed = .621371192237334f * windSpeed;
         }
 
-        // From wind direction in degrees, determine compass direction as a string (e.g NW)
-        // You know what's fun, writing really long if/else statements with tons of possible
-        // conditions.  Seriously, try it!
         String direction = "Unknown";
         if (degrees >= 337.5 || degrees < 22.5) {
             direction = "N";
@@ -178,19 +144,11 @@ public class Utility {
         } else if (degrees >= 292.5 && degrees < 337.5) {
             direction = "NW";
         }
+
         return String.format(context.getString(windFormat), windSpeed, direction);
     }
 
-    /**
-     * Helper method to provide the icon resource id according to the weather condition id returned
-     * by the OpenWeatherMap call.
-     *
-     * @param weatherId from OpenWeatherMap API response
-     * @return resource id for the corresponding icon. -1 if no relation is found.
-     */
     public static int getIconResourceForWeatherCondition(int weatherId) {
-        // Based on weather code data found at:
-        // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.ic_storm;
         } else if (weatherId >= 300 && weatherId <= 321) {
@@ -214,19 +172,11 @@ public class Utility {
         } else if (weatherId >= 802 && weatherId <= 804) {
             return R.drawable.ic_cloudy;
         }
+
         return -1;
     }
 
-    /**
-     * Helper method to provide the art resource id according to the weather condition id returned
-     * by the OpenWeatherMap call.
-     *
-     * @param weatherId from OpenWeatherMap API response
-     * @return resource id for the corresponding icon. -1 if no relation is found.
-     */
     public static int getArtResourceForWeatherCondition(int weatherId) {
-        // Based on weather code data found at:
-        // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.art_storm;
         } else if (weatherId >= 300 && weatherId <= 321) {
@@ -250,6 +200,7 @@ public class Utility {
         } else if (weatherId >= 802 && weatherId <= 804) {
             return R.drawable.art_clouds;
         }
+
         return -1;
     }
 }
