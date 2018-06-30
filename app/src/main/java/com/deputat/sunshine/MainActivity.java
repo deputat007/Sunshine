@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         super.onCreate(savedInstanceState);
         SunshineSyncAdapter.initializeSyncAdapter(this);
         updateLastLocation();
+
         units = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(getString(R.string.pref_units_key),
                         getString(R.string.pref_units_label_metric));
@@ -69,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     }
 
     private void updateLastLocation() {
+        if (!Utility.isLocationDetectionEnabled(this)) {
+            return;
+        }
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this,

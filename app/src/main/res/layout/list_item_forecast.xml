@@ -36,7 +36,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceLarge"
-            tools:targetApi="jelly_bean"
             tools:text="Tomorrow" />
 
         <TextView
@@ -45,7 +44,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceSmall"
-            tools:targetApi="jelly_bean"
             tools:text="Clear" />
     </LinearLayout>
 
@@ -63,7 +61,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceLarge"
-            tools:targetApi="jelly_bean"
             tools:text="17" />
 
         <TextView
@@ -72,7 +69,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceSmall"
-            tools:targetApi="jelly_bean"
             tools:text="11" />
     </LinearLayout>
 

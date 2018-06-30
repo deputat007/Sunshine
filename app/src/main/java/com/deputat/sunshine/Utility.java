@@ -33,13 +33,19 @@ public class Utility {
                 context.getString(R.string.pref_coord_lat_default));
     }
 
-
     private static boolean isMetric(Context context) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         return prefs.getString(context.getString(R.string.pref_units_key),
                 context.getString(R.string.pref_units_metric))
                 .equals(context.getString(R.string.pref_units_metric));
+    }
+
+    public static boolean isLocationDetectionEnabled(Context context) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        return prefs.getBoolean(context.getString(R.string.pref_enable_location_detection_key),
+                true);
     }
 
     @SuppressLint("StringFormatInvalid")

@@ -22,7 +22,6 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/black"
                 android:textSize="24sp"
-                tools:targetApi="jelly_bean"
                 tools:text="Tomorrow" />
 
             <TextView
@@ -32,7 +31,6 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/grey_700"
                 android:textSize="16sp"
-                tools:targetApi="jelly_bean"
                 tools:text="June 18" />
         </LinearLayout>
 
@@ -56,7 +54,6 @@
                     android:fontFamily="sans-serif-light"
                     android:textColor="@color/black"
                     android:textSize="96sp"
-                    tools:targetApi="jelly_bean"
                     tools:text="22°" />
 
                 <TextView
@@ -66,7 +63,6 @@
                     android:fontFamily="sans-serif-light"
                     android:textColor="@color/grey_700"
                     android:textSize="48sp"
-                    tools:targetApi="jelly_bean"
                     tools:text="18°" />
             </LinearLayout>
 
@@ -92,7 +88,6 @@
                     android:fontFamily="sans-serif-condensed"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:textColor="@color/grey_700"
-                    tools:targetApi="jelly_bean"
                     tools:text="Clear" />
             </LinearLayout>
         </LinearLayout>
@@ -110,7 +105,6 @@
                 android:fontFamily="sans-serif-light"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textColor="@color/black"
-                tools:targetApi="jelly_bean"
                 tools:text="Humidity: 71 %" />
 
             <TextView
@@ -121,7 +115,6 @@
                 android:fontFamily="sans-serif-light"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textColor="@color/black"
-                tools:targetApi="jelly_bean"
                 tools:text="Pressure: 1016 hPa" />
 
             <TextView
@@ -132,7 +125,6 @@
                 android:fontFamily="sans-serif-light"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:textColor="@color/black"
-                tools:targetApi="jelly_bean"
                 tools:text="Wind: 2 km/h NW" />
         </LinearLayout>
     </LinearLayout>

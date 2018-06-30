@@ -1,77 +1,129 @@
 package com.deputat.sunshine;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
-import android.view.MenuItem;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.CompoundButton;
 
-import java.util.Objects;
+import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.views.SettingsItem;
 
-public class SettingsActivity extends AppCompatPreferenceActivity
-        implements Preference.OnPreferenceChangeListener {
+public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private SettingsItem settingsItemUnits;
+    private SettingsItem settingsItemEnableNotification;
+    private SettingsItem settingsItemCity;
+    private SettingsItem settingsItemEnableLocationDetection;
+
+    private SharedPreferences sharedPreferences;
 
     @Override
-    @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupActionBar();
+        setContentView(R.layout.activity_settings);
 
-        addPreferencesFromResource(R.xml.pref_general);
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        settingsItemUnits = findViewById(R.id.si_units);
+        settingsItemEnableNotification = findViewById(R.id.si_enable_notification);
+        settingsItemCity = findViewById(R.id.si_city);
+        settingsItemEnableLocationDetection = findViewById(R.id.si_enable_location_detection);
+
+        updateData();
     }
 
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        final int id = item.getItemId();
-        if (id == android.R.id.home) {
-            if (!super.onMenuItemSelected(featureId, item)) {
-                NavUtils.navigateUpFromSameTask(this);
+    private void updateData() {
+        settingsItemUnits.setOnClickListener(this);
+        settingsItemEnableNotification.setOnClickListener(this);
+        settingsItemCity.setOnClickListener(this);
+        settingsItemEnableLocationDetection.setOnClickListener(this);
+
+        settingsItemEnableNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                sharedPreferences.edit()
+                        .putBoolean(settingsItemEnableNotification.getKey(), b)
+                        .apply();
+                settingsItemEnableNotification.setSubtitleText(b ?
+                        R.string.pref_enable_notifications_true :
+                        R.string.pref_enable_notifications_false);
             }
-            return true;
-        }
-        return super.onMenuItemSelected(featureId, item);
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object value) {
-        final String stringValue = value.toString();
-
-        if (preference instanceof ListPreference) {
-            final ListPreference listPreference = (ListPreference) preference;
-            final int prefIndex = listPreference.findIndexOfValue(stringValue);
-
-            if (prefIndex >= 0) {
-                preference.setSummary(listPreference.getEntries()[prefIndex]);
+        });
+        settingsItemEnableLocationDetection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                sharedPreferences.edit()
+                        .putBoolean(settingsItemEnableLocationDetection.getKey(),
+                                b)
+                        .apply();
+                settingsItemEnableLocationDetection.setSubtitleText(b ?
+                        R.string.pref_enable_location_detection_true :
+                        R.string.pref_enable_location_detection_false);
             }
-        } else {
-            preference.setSummary(stringValue);
-        }
+        });
 
-        return true;
-    }
+        settingsItemUnits.setSubtitleText(sharedPreferences.getString(settingsItemUnits.getKey(),
+                settingsItemUnits.getDefaultValue()));
 
-    private void setupActionBar() {
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        boolean enableNotification =
+                sharedPreferences.getBoolean(settingsItemEnableNotification.getKey(), true);
+        settingsItemEnableNotification.setSwitchChecked(enableNotification);
+        settingsItemEnableNotification.setSubtitleText(enableNotification ?
+                R.string.pref_enable_notifications_true :
+                R.string.pref_enable_notifications_false);
+
+        boolean enableLocationDetection =
+                sharedPreferences.getBoolean(settingsItemEnableLocationDetection.getKey(), true);
+        settingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
+        settingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
+                R.string.pref_enable_location_detection_true :
+                R.string.pref_enable_location_detection_false);
+
+        final Cursor cursor = getContentResolver()
+                .query(WeatherContract.LocationEntry.CONTENT_URI,
+                        new String[]{WeatherContract.LocationEntry.COLUMN_CITY_NAME},
+                        WeatherContract.LocationEntry.COLUMN_CITY_ID + " == ? ",
+                        new String[]{Utility.getLocationId(this)}, null);
+
+        if (cursor != null && cursor.moveToPosition(0)) {
+            settingsItemCity.setSubtitleText(cursor.getString(0));
+
+            cursor.close();
         }
     }
 
     @Override
-    public Intent getParentActivityIntent() {
-        return Objects.requireNonNull(super.getParentActivityIntent())
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    }
-
-    private void bindPreferenceSummaryToValue(Preference preference) {
-        preference.setOnPreferenceChangeListener(this);
-
-        onPreferenceChange(preference,
-                PreferenceManager.getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.si_city:
+                break;
+            case R.id.si_enable_location_detection:
+                boolean enableLocationDetection =
+                        !settingsItemEnableLocationDetection.isSwitchChecked();
+                settingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
+                sharedPreferences.edit()
+                        .putBoolean(settingsItemEnableLocationDetection.getKey(),
+                                enableLocationDetection)
+                        .apply();
+                settingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
+                        R.string.pref_enable_location_detection_true :
+                        R.string.pref_enable_location_detection_false);
+                break;
+            case R.id.si_enable_notification:
+                boolean enableNotification = !settingsItemEnableNotification.isSwitchChecked();
+                settingsItemEnableNotification.setSwitchChecked(enableNotification);
+                sharedPreferences.edit()
+                        .putBoolean(settingsItemEnableNotification.getKey(), enableNotification)
+                        .apply();
+                settingsItemEnableNotification.setSubtitleText(enableNotification ?
+                        R.string.pref_enable_notifications_true :
+                        R.string.pref_enable_notifications_false);
+                break;
+            case R.id.si_units:
+                break;
+        }
     }
 }

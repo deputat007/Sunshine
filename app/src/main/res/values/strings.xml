@@ -13,6 +13,13 @@
     <string name="pref_location_label">Location</string>
     <string name="pref_location_id" translatable="false">location</string>
     <string name="pref_location_id_default" translatable="false">77401</string>
+    <string name="pref_city_label">City</string>
+    <string name="pref_city" translatable="false">city</string>
+    <string name="pref_city_default" translatable="false">Ivano-Frankivsk</string>
+    <string name="pref_enable_location_detection_key">location_detection</string>
+    <string name="pref_enable_location_detection_true">Enabled</string>
+    <string name="pref_enable_location_detection_false">Not Enabled</string>
+    <string name="pref_enable_location_detection_label">Location Detection</string>
     <string name="pref_units_label">Temperature Units</string>
     <string name="pref_units_label_metric">Metric</string>
     <string name="pref_units_label_imperial">Imperial</string>
@@ -46,5 +53,4 @@
     <string name="content_authority">com.deputat.android.sunshine.app</string>
 
     <string name="format_notification">Forecast: <xliff:g id="condition">%1$s</xliff:g> High: <xliff:g id="high">%2$s</xliff:g> Low: <xliff:g id="low">%3$s</xliff:g></string>
-
 </resources>
