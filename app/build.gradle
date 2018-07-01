@@ -21,15 +21,35 @@ android {
     }
 }
 
+ext {
+    supportVersion = '28.0.0-alpha3'
+    gsonVersion = '2.8.5'
+    gmsVersion = '15.0.1'
+    eventbusVersion = '3.1.1'
+    junitVersion = '4.12'
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:28.0.0-alpha3'
-    implementation 'com.android.support:support-v4:28.0.0-alpha3'
-    implementation 'com.android.support:support-vector-drawable:28.0.0-alpha3'
-    implementation 'com.android.support:cardview-v7:28.0.0-alpha3'
-    implementation 'com.android.support:recyclerview-v7:28.0.0-alpha3'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
-    implementation 'org.greenrobot:eventbus:3.1.1'
-    testImplementation 'junit:junit:4.12'
+
+    // Support libraries
+    implementation "com.android.support:appcompat-v7:${supportVersion}"
+    implementation "com.android.support:support-v4:${supportVersion}"
+    implementation "com.android.support:support-vector-drawable:${supportVersion}"
+    implementation "com.android.support:cardview-v7:${supportVersion}"
+    implementation "com.android.support:recyclerview-v7:${supportVersion}"
+
+    // Gson
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+    // EventBus is a publish/subscribe event bus optimized for Android
+    // https://mvnrepository.com/artifact/org.greenrobot/eventbus
+    implementation "org.greenrobot:eventbus:${eventbusVersion}"
+    // Play Services Location
+    // https://mvnrepository.com/artifact/com.google.android.gms/play-services-location
+    implementation "com.google.android.gms:play-services-location:${gmsVersion}"
+
+    // JUnit
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation "junit:junit:${junitVersion}"
 }
