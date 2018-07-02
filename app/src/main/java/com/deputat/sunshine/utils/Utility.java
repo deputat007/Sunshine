@@ -1,10 +1,12 @@
-package com.deputat.sunshine;
+package com.deputat.sunshine.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
+
+import com.deputat.sunshine.R;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

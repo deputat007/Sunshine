@@ -9,8 +9,4 @@
 
     <!-- Main activity theme. -->
     <style name="ForecastTheme" parent="AppTheme" />
-
-    <style name="ForecastListStyle">
-        <item name="android:choiceMode">singleChoice</item>
-    </style>
 </resources>

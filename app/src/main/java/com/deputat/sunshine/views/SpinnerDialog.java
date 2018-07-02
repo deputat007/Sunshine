@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class SpinnerDialog {
 
-    private Dialog mAlertDialog;
+    private Dialog alertDialog;
 
     public SpinnerDialog(Activity activity) {
         initView(activity);
@@ -27,31 +27,31 @@ public class SpinnerDialog {
         final View layout = Objects.requireNonNull(inflater)
                 .inflate(R.layout.progress_dialog, null, false);
 
-        mAlertDialog = new Dialog(activity);
-        mAlertDialog.setCanceledOnTouchOutside(false);
-        mAlertDialog.setCancelable(false);
-        mAlertDialog.setContentView(layout);
+        alertDialog = new Dialog(activity);
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setCancelable(false);
+        alertDialog.setContentView(layout);
 
-        if (mAlertDialog.getWindow() != null) {
-            mAlertDialog.getWindow().setBackgroundDrawable(
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(
                     new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
     }
 
     public void show() {
-        if (mAlertDialog != null && mAlertDialog.isShowing()) {
+        if (alertDialog != null && alertDialog.isShowing()) {
             hide();
         }
-        if (mAlertDialog != null && !mAlertDialog.isShowing()) {
-            mAlertDialog.show();
+        if (alertDialog != null && !alertDialog.isShowing()) {
+            alertDialog.show();
         }
     }
 
     private void hide() {
-        mAlertDialog.dismiss();
+        alertDialog.dismiss();
     }
 
     public boolean isShowing() {
-        return mAlertDialog.isShowing();
+        return alertDialog.isShowing();
     }
 }

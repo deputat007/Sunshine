@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -16,16 +15,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.deputat.sunshine.events.LocationChangedEvent;
+import com.deputat.sunshine.events.OnForecastItemSelectedEvent;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
+import com.deputat.sunshine.utils.Utility;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
+public class MainActivity extends AppCompatActivity {
 
     public static final String KEY_TWO_PANE = "KEY_TWO_PANE";
     private static final String DETAIL_FRAGMENT_TAG = "DETAIL_FRAGMENT_TAG";
@@ -37,14 +39,14 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SunshineSyncAdapter.initializeSyncAdapter(this);
+        setContentView(R.layout.activity_main);
+        EventBus.getDefault().register(this);
         updateLastLocation();
 
         units = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(getString(R.string.pref_units_key),
                         getString(R.string.pref_units_label_metric));
 
-        setContentView(R.layout.activity_main);
         if (findViewById(R.id.weather_detail_container) != null) {
             twoPane = true;
 
@@ -67,6 +69,13 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
 
         Objects.requireNonNull(forecastFragment).setArguments(arguments);
         forecastFragment.setUseTodayLayout(!twoPane);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     private void updateLastLocation() {
@@ -161,18 +170,20 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onItemSelected(Uri dateUri) {
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onItemSelected(OnForecastItemSelectedEvent event) {
         if (twoPane) {
             final DetailFragment detailFragment = new DetailFragment();
             final Bundle arguments = new Bundle();
-            arguments.putParcelable(DetailFragment.DETAIL_URI, dateUri);
+            arguments.putParcelable(DetailFragment.DETAIL_URI, event.getDateUri());
             detailFragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.weather_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
                     .commit();
         } else {
-            startActivity(new Intent(this, DetailActivity.class).setData(dateUri));
+            startActivity(new Intent(this,
+                    DetailActivity.class).setData(event.getDateUri()));
         }
     }
 }

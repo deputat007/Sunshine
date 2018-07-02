@@ -28,8 +28,8 @@ import android.util.Log;
 import com.deputat.sunshine.BuildConfig;
 import com.deputat.sunshine.MainActivity;
 import com.deputat.sunshine.R;
-import com.deputat.sunshine.Utility;
 import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;

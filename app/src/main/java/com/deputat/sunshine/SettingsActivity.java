@@ -1,14 +1,18 @@
 package com.deputat.sunshine;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 
 import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.utils.Utility;
 import com.deputat.sunshine.views.SettingsItem;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
@@ -123,7 +127,40 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                         R.string.pref_enable_notifications_false);
                 break;
             case R.id.si_units:
+                showUnitsDialog();
                 break;
         }
+    }
+
+    private void showUnitsDialog() {
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_single_choice);
+        final String[] units = getResources().getStringArray(R.array.pref_units_options);
+        final String[] values = getResources().getStringArray(R.array.pref_units_values);
+
+        adapter.addAll(units);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.alert_dialog_choose_unit_title)
+                .setCancelable(true)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final String selectedUnit = adapter.getItem(i);
+
+                        settingsItemUnits.setSubtitleText(selectedUnit);
+                        sharedPreferences.edit()
+                                .putString(settingsItemUnits.getKey(), values[i])
+                                .apply();
+                    }
+                });
+
+        builder.show();
     }
 }

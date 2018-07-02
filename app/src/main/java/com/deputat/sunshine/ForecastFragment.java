@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,12 +21,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.deputat.sunshine.data.WeatherContract;
 import com.deputat.sunshine.events.LocationChangedEvent;
+import com.deputat.sunshine.events.OnForecastItemClickEvent;
+import com.deputat.sunshine.events.OnForecastItemSelectedEvent;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
+import com.deputat.sunshine.utils.Utility;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -63,9 +65,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private ForecastAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ListView listView;
+    private RecyclerView recyclerView;
 
-    private int position = ListView.INVALID_POSITION;
+    private int INVALID_POSITION = -1;
+
+    private int position = INVALID_POSITION;
 
     public ForecastFragment() {
     }
@@ -116,29 +120,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        adapter = new ForecastAdapter(getContext(), null, 0);
+        adapter = new ForecastAdapter(getContext(), null);
 
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        listView = rootView.findViewById(R.id.listview_forecast);
+        recyclerView = rootView.findViewById(R.id.recycler_view_forecast);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setColorSchemeResources(R.color.sunshine_light_blue,
                 R.color.sunshine_blue, R.color.sunshine_dark_blue);
-        listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @TargetApi(Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                final Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-                if (cursor != null) {
-                    String locationSetting = Utility.getLocationId(getActivity());
-                    ((MainActivity) Objects.requireNonNull(getActivity())).onItemSelected(
-                            WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting,
-                                    cursor.getLong(COL_WEATHER_DATE)));
-                }
-                ForecastFragment.this.position = position;
-            }
-        });
+        recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -157,7 +146,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (position != ListView.INVALID_POSITION) {
+        if (position != INVALID_POSITION) {
             outState.putInt(KEY_POSITION, position);
         }
     }
@@ -183,16 +172,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         adapter.swapCursor(data);
         swipeRefreshLayout.setRefreshing(false);
 
-        if (position != ListView.INVALID_POSITION) {
-            listView.smoothScrollToPosition(position);
+        if (position != INVALID_POSITION) {
+            recyclerView.smoothScrollToPosition(position);
         } else {
             if (Objects.requireNonNull(getArguments()).getBoolean(MainActivity.KEY_TWO_PANE,
                     false)) {
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
-                        listView.performItemClick(listView, 0,
-                                listView.getItemIdAtPosition(0));
+                        recyclerView.smoothScrollToPosition(0);
                     }
                 });
             }
@@ -207,9 +195,22 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @SuppressWarnings({"deprecation", "unused"})
     @Subscribe
-    void onLocationChanged(LocationChangedEvent locationChangedEvent) {
+    public void onLocationChanged(LocationChangedEvent locationChangedEvent) {
         updateWeather();
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+    }
+
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onForecastItemClick(OnForecastItemClickEvent event) {
+        final int position = event.getPosition();
+
+        final String locationSetting = Utility.getLocationId(getActivity());
+        EventBus.getDefault().post(new OnForecastItemSelectedEvent(
+                WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting,
+                        event.getDate())));
+
+        ForecastFragment.this.position = position;
     }
 
     private void updateWeather() {
@@ -239,10 +240,5 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     public void setUseTodayLayout(boolean useTodayLayout) {
         adapter.setUseTodayLayout(useTodayLayout);
-    }
-
-    public interface Callback {
-        @SuppressWarnings("unused")
-        void onItemSelected(Uri dateUri);
     }
 }
