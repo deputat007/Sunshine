@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 27
@@ -28,6 +29,7 @@ ext {
     gmsVersion = '15.0.1'
     eventbusVersion = '3.1.1'
     junitVersion = '4.12'
+    firebaseVersion = '16.0.1'
 }
 
 dependencies {
@@ -35,10 +37,13 @@ dependencies {
 
     // Support libraries
     implementation "com.android.support:appcompat-v7:${supportVersion}"
+    implementation "com.android.support:design:${supportVersion}"
     implementation "com.android.support:support-v4:${supportVersion}"
     implementation "com.android.support:support-vector-drawable:${supportVersion}"
     implementation "com.android.support:cardview-v7:${supportVersion}"
     implementation "com.android.support:recyclerview-v7:${supportVersion}"
+    implementation "com.google.firebase:firebase-core:${firebaseVersion}"
+    implementation "com.google.firebase:firebase-database:${firebaseVersion}"
 
     // Gson
     // https://mvnrepository.com/artifact/com.google.code.gson/gson

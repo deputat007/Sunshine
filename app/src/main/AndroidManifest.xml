@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.deputat.sunshine">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
@@ -14,11 +13,12 @@
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
+        android:theme="@style/ForecastTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/ForecastTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,8 +29,7 @@
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/ForecastTheme"
-            tools:targetApi="jelly_bean">
+            android:theme="@style/ForecastTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -38,12 +37,23 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
+            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/ForecastTheme"
-            tools:targetApi="jelly_bean">
+            android:theme="@style/ForecastTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".CitiesActivity"
+            android:label="@string/title_activity_cities"
+            android:parentActivityName=".SettingsActivity"
+            android:theme="@style/ForecastTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity" />
+
         </activity>
 
         <provider

@@ -65,10 +65,10 @@ public class ForecastAdapter extends CursorRecyclerViewAdapter<ForecastAdapter.V
         int layoutId = -1;
         switch (viewType) {
             case VIEW_TYPE_TODAY:
-                layoutId = R.layout.list_item_forecast_today;
+                layoutId = R.layout.item_forecast_today;
                 break;
             case VIEW_TYPE_FUTURE_DAY:
-                layoutId = R.layout.list_item_forecast;
+                layoutId = R.layout.item_forecast;
                 break;
         }
         final View view = LayoutInflater.from(viewGroup.getContext()).inflate(layoutId, viewGroup,

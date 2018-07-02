@@ -48,10 +48,13 @@
     <string name="format_wind_kmh">Wind:<xliff:g id="speed">%1$1.0f</xliff:g> km/h<xliff:g id="direction">%2$s</xliff:g></string>
     <string name="format_pressure">Pressure: <xliff:g id="pressure">%1.0f</xliff:g> hPa</string>
     <string name="format_humidity">Humidity: <xliff:g id="humidity">%1.0f</xliff:g> %%</string>
+    <string name="format_city"><xliff:g id="city">%1$s</xliff:g> (<xliff:g id="country">%2$s</xliff:g>)</string>
 
     <string name="sync_account_type">sunshine.deputat.com</string>
     <string name="content_authority">com.deputat.android.sunshine.app</string>
 
     <string name="format_notification">Forecast: <xliff:g id="condition">%1$s</xliff:g> High: <xliff:g id="high">%2$s</xliff:g> Low: <xliff:g id="low">%3$s</xliff:g></string>
     <string name="alert_dialog_choose_unit_title">Choose Unit</string>
+    <string name="title_activity_cities">Cities</string>
+    <string name="text_search">Search</string>
 </resources>

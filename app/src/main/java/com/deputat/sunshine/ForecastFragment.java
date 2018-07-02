@@ -1,10 +1,8 @@
 package com.deputat.sunshine;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -75,7 +73,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
@@ -151,7 +148,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     @NonNull
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -165,7 +161,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 FORECAST_COLUMNS, null, null, sortOrder);
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
                                Cursor data) {
@@ -173,7 +168,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         swipeRefreshLayout.setRefreshing(false);
 
         if (position != INVALID_POSITION) {
-            recyclerView.smoothScrollToPosition(position);
+            if (Objects.requireNonNull(getArguments()).getBoolean(MainActivity.KEY_TWO_PANE,
+                    false)) {
+                recyclerView.smoothScrollToPosition(position);
+            }
         } else {
             if (Objects.requireNonNull(getArguments()).getBoolean(MainActivity.KEY_TWO_PANE,
                     false)) {
@@ -193,7 +191,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    @SuppressWarnings({"deprecation", "unused"})
+    @SuppressWarnings({"unused"})
     @Subscribe
     public void onLocationChanged(LocationChangedEvent locationChangedEvent) {
         updateWeather();

@@ -1,12 +1,34 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="ForecastTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/sunshine_blue</item>
         <item name="colorPrimaryDark">@color/sunshine_dark_blue</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <!-- Customize your theme here. -->
     </style>
 
-    <!-- Main activity theme. -->
-    <style name="ForecastTheme" parent="AppTheme" />
+    <style name="ForecastTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="ForecastTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+
+    </style>
+
+    <style name="SettingsWrapper">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:padding">@dimen/offset_regular</item>
+    </style>
+
+    <style name="SettingsTextViewTitle">
+        <item name="android:textSize">@dimen/text_size_16</item>
+        <item name="android:textColor">@color/settings_title</item>
+    </style>
+
+    <style name="SettingsTextViewTitle.Subtitle">
+        <item name="android:textSize">@dimen/text_size_14</item>
+        <item name="android:textColor">@color/settings_subtitle</item>
+    </style>
 </resources>

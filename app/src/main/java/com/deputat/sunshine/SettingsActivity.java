@@ -1,19 +1,28 @@
 package com.deputat.sunshine;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 
 import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.events.LocationChangedEvent;
 import com.deputat.sunshine.utils.Utility;
 import com.deputat.sunshine.views.SettingsItem;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -28,6 +37,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -37,6 +49,14 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         settingsItemEnableLocationDetection = findViewById(R.id.si_enable_location_detection);
 
         updateData();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateData() {
@@ -70,7 +90,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         });
 
         settingsItemUnits.setSubtitleText(sharedPreferences.getString(settingsItemUnits.getKey(),
-                settingsItemUnits.getDefaultValue()));
+                settingsItemUnits.getDefaultValue()).equals(getString(R.string.pref_units_metric)) ?
+                getString(R.string.pref_units_label_metric) :
+                getString(R.string.pref_units_label_imperial));
 
         boolean enableNotification =
                 sharedPreferences.getBoolean(settingsItemEnableNotification.getKey(), true);
@@ -103,6 +125,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.si_city:
+                startActivity(new Intent(this, CitiesActivity.class));
                 break;
             case R.id.si_enable_location_detection:
                 boolean enableLocationDetection =
@@ -158,6 +181,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                         sharedPreferences.edit()
                                 .putString(settingsItemUnits.getKey(), values[i])
                                 .apply();
+
+                        EventBus.getDefault().post(new LocationChangedEvent());
                     }
                 });
 
