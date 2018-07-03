@@ -3,32 +3,32 @@ package com.deputat.sunshine.data;
 import java.util.Objects;
 
 public class City {
-    private final long id;
-    private final String name;
-    private final String country;
-    private final Coord coord;
+    private final long mId;
+    private final String mName;
+    private final String mCountry;
+    private final Coord mCoord;
 
     public City(long id, String name, String country, Coord coord) {
-        this.id = id;
-        this.name = name;
-        this.country = country;
-        this.coord = coord;
+        this.mId = id;
+        this.mName = name;
+        this.mCountry = country;
+        this.mCoord = coord;
     }
 
     public long getId() {
-        return id;
+        return mId;
     }
 
     public String getName() {
-        return name;
+        return mName;
     }
 
     public String getCountry() {
-        return country;
+        return mCountry;
     }
 
     public Coord getCoord() {
-        return coord;
+        return mCoord;
     }
 
     @Override
@@ -36,33 +36,33 @@ public class City {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         City city = (City) o;
-        return id == city.id &&
-                Objects.equals(name, city.name) &&
-                Objects.equals(country, city.country) &&
-                Objects.equals(coord, city.coord);
+        return mId == city.mId &&
+                Objects.equals(mName, city.mName) &&
+                Objects.equals(mCountry, city.mCountry) &&
+                Objects.equals(mCoord, city.mCoord);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, name, country, coord);
+        return Objects.hash(mId, mName, mCountry, mCoord);
     }
 
     private static class Coord {
-        private final double lon;
-        private final double lat;
+        private final double mLon;
+        private final double mLat;
 
         private Coord(double lon, double lat) {
-            this.lon = lon;
-            this.lat = lat;
+            this.mLon = lon;
+            this.mLat = lat;
         }
 
         public double getLon() {
-            return lon;
+            return mLon;
         }
 
         public double getLat() {
-            return lat;
+            return mLat;
         }
 
         @Override
@@ -70,13 +70,13 @@ public class City {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Coord coord = (Coord) o;
-            return Double.compare(coord.lon, lon) == 0 &&
-                    Double.compare(coord.lat, lat) == 0;
+            return Double.compare(coord.mLon, mLon) == 0 &&
+                    Double.compare(coord.mLat, mLat) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(lon, lat);
+            return Objects.hash(mLon, mLat);
         }
     }
 }

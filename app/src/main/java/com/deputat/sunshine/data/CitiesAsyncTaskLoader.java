@@ -14,18 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CitiesAsyncTaskLoader extends AsyncTaskLoader<List<City>> {
-    private final String searchText;
-    private List<City> data;
+    private final String mSearchText;
+    private List<City> mData;
 
     public CitiesAsyncTaskLoader(Context context, String searchText) {
         super(context);
-        this.searchText = searchText;
+        this.mSearchText = searchText;
     }
 
     @Override
     protected void onStartLoading() {
-        if (data != null) {
-            deliverResult(data);
+        if (mData != null) {
+            deliverResult(mData);
         } else {
             forceLoad();
         }
@@ -38,7 +38,7 @@ public class CitiesAsyncTaskLoader extends AsyncTaskLoader<List<City>> {
 
     @Override
     public void deliverResult(List<City> data) {
-        this.data = data;
+        this.mData = data;
 
         super.deliverResult(data);
     }
@@ -57,7 +57,7 @@ public class CitiesAsyncTaskLoader extends AsyncTaskLoader<List<City>> {
             while (jsonReader.hasNext()) {
                 final City city = gson.fromJson(jsonReader, City.class);
 
-                if (city.getName().contains(searchText)) {
+                if (city.getName().contains(mSearchText)) {
                     cities.add(city);
                 }
             }

@@ -8,10 +8,10 @@
 
     <fragment
         android:id="@+id/fragment_forecast"
-        android:name="com.deputat.sunshine.ForecastFragment"
+        android:name="com.deputat.sunshine.fragments.ForecastFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.deputat.sunshine.ForecastFragment"
+        tools:context="com.deputat.sunshine.fragments.ForecastFragment"
         tools:layout="@android:layout/list_content" />
 
 </LinearLayout>

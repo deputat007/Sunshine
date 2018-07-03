@@ -5,15 +5,15 @@ import android.content.Intent;
 import android.os.IBinder;
 
 public class SunshineAuthenticatorService extends Service {
-    private SunshineAuthenticator authenticator;
+    private SunshineAuthenticator mAuthenticator;
 
     @Override
     public void onCreate() {
-        authenticator = new SunshineAuthenticator(this);
+        mAuthenticator = new SunshineAuthenticator(this);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return authenticator.getIBinder();
+        return mAuthenticator.getIBinder();
     }
 }

@@ -1,4 +1,4 @@
-package com.deputat.sunshine;
+package com.deputat.sunshine.activities;
 
 import android.Manifest;
 import android.content.Intent;
@@ -10,15 +10,16 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.deputat.sunshine.R;
 import com.deputat.sunshine.events.LocationChangedEvent;
 import com.deputat.sunshine.events.OnForecastItemSelectedEvent;
+import com.deputat.sunshine.fragments.DetailFragment;
+import com.deputat.sunshine.fragments.ForecastFragment;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
-import com.deputat.sunshine.utils.Utility;
+import com.deputat.sunshine.utils.SharedPreferenceUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -28,29 +29,41 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     public static final String KEY_TWO_PANE = "KEY_TWO_PANE";
     private static final String DETAIL_FRAGMENT_TAG = "DETAIL_FRAGMENT_TAG";
     private static final int PERMISSIONS_REQUEST_LOCATION = 101;
 
-    private String units;
-    private boolean twoPane;
+    private String mUnits;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        EventBus.getDefault().register(this);
         updateLastLocation();
 
-        units = PreferenceManager.getDefaultSharedPreferences(this)
+        mUnits = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(getString(R.string.pref_units_key),
                         getString(R.string.pref_units_label_metric));
 
+
+    }
+
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    protected void initUI() {
+
+    }
+
+    @Override
+    protected void setUI(final Bundle savedInstanceState) {
         if (findViewById(R.id.weather_detail_container) != null) {
-            twoPane = true;
+            mTwoPane = true;
 
             if (savedInstanceState == null) {
                 final Fragment fragment = new DetailFragment();
@@ -60,28 +73,87 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
             }
         } else {
-            twoPane = false;
+            mTwoPane = false;
         }
 
         final ForecastFragment forecastFragment =
                 (ForecastFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_forecast);
         final Bundle arguments = new Bundle();
-        arguments.putBoolean(KEY_TWO_PANE, twoPane);
+        arguments.putBoolean(KEY_TWO_PANE, mTwoPane);
 
         Objects.requireNonNull(forecastFragment).setArguments(arguments);
-        forecastFragment.setUseTodayLayout(!twoPane);
+        forecastFragment.setUseTodayLayout(!mTwoPane);
         SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
+    protected boolean useEventBus() {
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_LOCATION: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    updateLastLocation();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        final String units = preferences.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_label_metric));
+
+        if (!units.equals(this.mUnits)) {
+            EventBus.getDefault().post(new LocationChangedEvent());
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onItemSelected(OnForecastItemSelectedEvent event) {
+        if (mTwoPane) {
+            final DetailFragment detailFragment = new DetailFragment();
+            final Bundle arguments = new Bundle();
+            arguments.putParcelable(DetailFragment.DETAIL_URI, event.getDateUri());
+            detailFragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
+                    .commit();
+        } else {
+            startActivity(new Intent(this,
+                    DetailActivity.class).setData(event.getDateUri()));
+        }
     }
 
     private void updateLastLocation() {
-        if (!Utility.isLocationDetectionEnabled(this)) {
+        if (!SharedPreferenceUtil.isLocationDetectionEnabled(this)) {
             return;
         }
         if (ActivityCompat.checkSelfPermission(this,
@@ -112,80 +184,11 @@ public class MainActivity extends AppCompatActivity {
                                         .putString(getString(R.string.pref_coord_lon),
                                                 String.valueOf(location.getLongitude()))
                                         .apply();
-                                final String locationId = preferences.getString(
-                                        getString(R.string.pref_location_id),
-                                        getString(R.string.pref_location_id_default));
 
                                 EventBus.getDefault().post(new LocationChangedEvent());
-
                             }
                         }
                     });
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    updateLastLocation();
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        final SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        final String units = preferences.getString(getString(R.string.pref_units_key), getString(R.string.pref_units_label_metric));
-
-        if (!units.equals(this.units)) {
-            final String locationId = preferences.getString(
-                    getString(R.string.pref_location_id),
-                    getString(R.string.pref_location_id_default));
-
-            EventBus.getDefault().post(new LocationChangedEvent());
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        final int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Subscribe
-    @SuppressWarnings("unused")
-    public void onItemSelected(OnForecastItemSelectedEvent event) {
-        if (twoPane) {
-            final DetailFragment detailFragment = new DetailFragment();
-            final Bundle arguments = new Bundle();
-            arguments.putParcelable(DetailFragment.DETAIL_URI, event.getDateUri());
-            detailFragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.weather_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
-                    .commit();
-        } else {
-            startActivity(new Intent(this,
-                    DetailActivity.class).setData(event.getDateUri()));
         }
     }
 }

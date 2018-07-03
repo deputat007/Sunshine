@@ -1,4 +1,4 @@
-package com.deputat.sunshine;
+package com.deputat.sunshine.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,47 +8,109 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 
+import com.deputat.sunshine.R;
 import com.deputat.sunshine.data.WeatherContract;
 import com.deputat.sunshine.events.LocationChangedEvent;
-import com.deputat.sunshine.utils.Utility;
+import com.deputat.sunshine.utils.SharedPreferenceUtil;
 import com.deputat.sunshine.views.SettingsItem;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Objects;
+public class SettingsActivity extends BaseActivity implements View.OnClickListener {
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+    private SettingsItem mSettingsItemUnits;
+    private SettingsItem mSettingsItemEnableNotification;
+    private SettingsItem mSettingsItemCity;
+    private SettingsItem mSettingsItemEnableLocationDetection;
 
-    private SettingsItem settingsItemUnits;
-    private SettingsItem settingsItemEnableNotification;
-    private SettingsItem settingsItemCity;
-    private SettingsItem settingsItemEnableLocationDetection;
-
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
 
-        settingsItemUnits = findViewById(R.id.si_units);
-        settingsItemEnableNotification = findViewById(R.id.si_enable_notification);
-        settingsItemCity = findViewById(R.id.si_city);
-        settingsItemEnableLocationDetection = findViewById(R.id.si_enable_location_detection);
+    @Override
+    protected int getContentView() {
+        return R.layout.activity_settings;
+    }
 
-        updateData();
+    @Override
+    protected void initUI() {
+        mSettingsItemUnits = findViewById(R.id.si_units);
+        mSettingsItemEnableNotification = findViewById(R.id.si_enable_notification);
+        mSettingsItemCity = findViewById(R.id.si_city);
+        mSettingsItemEnableLocationDetection = findViewById(R.id.si_enable_location_detection);
+    }
+
+    @Override
+    protected void setUI(final Bundle savedInstanceState) {
+        mSettingsItemUnits.setOnClickListener(this);
+        mSettingsItemEnableNotification.setOnClickListener(this);
+        mSettingsItemCity.setOnClickListener(this);
+        mSettingsItemEnableLocationDetection.setOnClickListener(this);
+
+        mSettingsItemEnableNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mSharedPreferences.edit()
+                        .putBoolean(mSettingsItemEnableNotification.getKey(), b)
+                        .apply();
+                mSettingsItemEnableNotification.setSubtitleText(b ?
+                        R.string.pref_enable_notifications_true :
+                        R.string.pref_enable_notifications_false);
+            }
+        });
+        mSettingsItemEnableLocationDetection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mSharedPreferences.edit()
+                        .putBoolean(mSettingsItemEnableLocationDetection.getKey(),
+                                b)
+                        .apply();
+                mSettingsItemEnableLocationDetection.setSubtitleText(b ?
+                        R.string.pref_enable_location_detection_true :
+                        R.string.pref_enable_location_detection_false);
+            }
+        });
+
+        mSettingsItemUnits.setSubtitleText(mSharedPreferences.getString(mSettingsItemUnits.getKey(),
+                mSettingsItemUnits.getDefaultValue()).equals(getString(R.string.pref_units_metric)) ?
+                getString(R.string.pref_units_label_metric) :
+                getString(R.string.pref_units_label_imperial));
+
+        boolean enableNotification =
+                mSharedPreferences.getBoolean(mSettingsItemEnableNotification.getKey(), true);
+        mSettingsItemEnableNotification.setSwitchChecked(enableNotification);
+        mSettingsItemEnableNotification.setSubtitleText(enableNotification ?
+                R.string.pref_enable_notifications_true :
+                R.string.pref_enable_notifications_false);
+
+        boolean enableLocationDetection =
+                mSharedPreferences.getBoolean(mSettingsItemEnableLocationDetection.getKey(), true);
+        mSettingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
+        mSettingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
+                R.string.pref_enable_location_detection_true :
+                R.string.pref_enable_location_detection_false);
+
+        final Cursor cursor = getContentResolver()
+                .query(WeatherContract.LocationEntry.CONTENT_URI,
+                        new String[]{WeatherContract.LocationEntry.COLUMN_CITY_NAME},
+                        WeatherContract.LocationEntry.COLUMN_CITY_ID + " == ? ",
+                        new String[]{SharedPreferenceUtil.getLocationId(this)}, null);
+
+        if (cursor != null && cursor.moveToPosition(0)) {
+            mSettingsItemCity.setSubtitleText(cursor.getString(0));
+
+            cursor.close();
+        }
     }
 
     @Override
@@ -59,68 +121,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         return super.onOptionsItemSelected(item);
     }
 
-    private void updateData() {
-        settingsItemUnits.setOnClickListener(this);
-        settingsItemEnableNotification.setOnClickListener(this);
-        settingsItemCity.setOnClickListener(this);
-        settingsItemEnableLocationDetection.setOnClickListener(this);
-
-        settingsItemEnableNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                sharedPreferences.edit()
-                        .putBoolean(settingsItemEnableNotification.getKey(), b)
-                        .apply();
-                settingsItemEnableNotification.setSubtitleText(b ?
-                        R.string.pref_enable_notifications_true :
-                        R.string.pref_enable_notifications_false);
-            }
-        });
-        settingsItemEnableLocationDetection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                sharedPreferences.edit()
-                        .putBoolean(settingsItemEnableLocationDetection.getKey(),
-                                b)
-                        .apply();
-                settingsItemEnableLocationDetection.setSubtitleText(b ?
-                        R.string.pref_enable_location_detection_true :
-                        R.string.pref_enable_location_detection_false);
-            }
-        });
-
-        settingsItemUnits.setSubtitleText(sharedPreferences.getString(settingsItemUnits.getKey(),
-                settingsItemUnits.getDefaultValue()).equals(getString(R.string.pref_units_metric)) ?
-                getString(R.string.pref_units_label_metric) :
-                getString(R.string.pref_units_label_imperial));
-
-        boolean enableNotification =
-                sharedPreferences.getBoolean(settingsItemEnableNotification.getKey(), true);
-        settingsItemEnableNotification.setSwitchChecked(enableNotification);
-        settingsItemEnableNotification.setSubtitleText(enableNotification ?
-                R.string.pref_enable_notifications_true :
-                R.string.pref_enable_notifications_false);
-
-        boolean enableLocationDetection =
-                sharedPreferences.getBoolean(settingsItemEnableLocationDetection.getKey(), true);
-        settingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
-        settingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
-                R.string.pref_enable_location_detection_true :
-                R.string.pref_enable_location_detection_false);
-
-        final Cursor cursor = getContentResolver()
-                .query(WeatherContract.LocationEntry.CONTENT_URI,
-                        new String[]{WeatherContract.LocationEntry.COLUMN_CITY_NAME},
-                        WeatherContract.LocationEntry.COLUMN_CITY_ID + " == ? ",
-                        new String[]{Utility.getLocationId(this)}, null);
-
-        if (cursor != null && cursor.moveToPosition(0)) {
-            settingsItemCity.setSubtitleText(cursor.getString(0));
-
-            cursor.close();
-        }
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -129,23 +129,23 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.si_enable_location_detection:
                 boolean enableLocationDetection =
-                        !settingsItemEnableLocationDetection.isSwitchChecked();
-                settingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
-                sharedPreferences.edit()
-                        .putBoolean(settingsItemEnableLocationDetection.getKey(),
+                        !mSettingsItemEnableLocationDetection.isSwitchChecked();
+                mSettingsItemEnableLocationDetection.setSwitchChecked(enableLocationDetection);
+                mSharedPreferences.edit()
+                        .putBoolean(mSettingsItemEnableLocationDetection.getKey(),
                                 enableLocationDetection)
                         .apply();
-                settingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
+                mSettingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
                         R.string.pref_enable_location_detection_true :
                         R.string.pref_enable_location_detection_false);
                 break;
             case R.id.si_enable_notification:
-                boolean enableNotification = !settingsItemEnableNotification.isSwitchChecked();
-                settingsItemEnableNotification.setSwitchChecked(enableNotification);
-                sharedPreferences.edit()
-                        .putBoolean(settingsItemEnableNotification.getKey(), enableNotification)
+                boolean enableNotification = !mSettingsItemEnableNotification.isSwitchChecked();
+                mSettingsItemEnableNotification.setSwitchChecked(enableNotification);
+                mSharedPreferences.edit()
+                        .putBoolean(mSettingsItemEnableNotification.getKey(), enableNotification)
                         .apply();
-                settingsItemEnableNotification.setSubtitleText(enableNotification ?
+                mSettingsItemEnableNotification.setSubtitleText(enableNotification ?
                         R.string.pref_enable_notifications_true :
                         R.string.pref_enable_notifications_false);
                 break;
@@ -177,9 +177,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     public void onClick(DialogInterface dialogInterface, int i) {
                         final String selectedUnit = adapter.getItem(i);
 
-                        settingsItemUnits.setSubtitleText(selectedUnit);
-                        sharedPreferences.edit()
-                                .putString(settingsItemUnits.getKey(), values[i])
+                        mSettingsItemUnits.setSubtitleText(selectedUnit);
+                        mSharedPreferences.edit()
+                                .putString(mSettingsItemUnits.getKey(), values[i])
                                 .apply();
 
                         EventBus.getDefault().post(new LocationChangedEvent());

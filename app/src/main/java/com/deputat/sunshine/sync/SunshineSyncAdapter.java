@@ -26,10 +26,11 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.deputat.sunshine.BuildConfig;
-import com.deputat.sunshine.MainActivity;
 import com.deputat.sunshine.R;
+import com.deputat.sunshine.activities.MainActivity;
 import com.deputat.sunshine.data.WeatherContract;
-import com.deputat.sunshine.utils.Utility;
+import com.deputat.sunshine.utils.SharedPreferenceUtil;
+import com.deputat.sunshine.utils.WeatherUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -131,8 +132,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-        final String lon = Utility.getCoordLon(getContext());
-        final String lat = Utility.getCoordLat(getContext());
+        final String lon = SharedPreferenceUtil.getCoordLon(getContext());
+        final String lat = SharedPreferenceUtil.getCoordLat(getContext());
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -371,7 +372,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         final long lastSync = prefs.getLong(lastNotificationKey, 0);
 
         if (System.currentTimeMillis() - lastSync >= DAY_IN_MILLIS) {
-            final String locationQuery = Utility.getLocationId(context);
+            final String locationQuery = SharedPreferenceUtil.getLocationId(context);
 
             final Uri weatherUri = WeatherContract.WeatherEntry
                     .buildWeatherLocationWithDate(locationQuery, System.currentTimeMillis());
@@ -385,12 +386,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 final double low = cursor.getDouble(INDEX_MIN_TEMP);
                 final String desc = cursor.getString(INDEX_SHORT_DESC);
 
-                final int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+                final int iconId = WeatherUtil.getIconResourceForWeatherCondition(weatherId);
                 final String title = context.getString(R.string.app_name);
 
                 final String contentText = String.format(context.getString(R.string.format_notification),
-                        desc, Utility.formatTemperature(context, high),
-                        Utility.formatTemperature(context, low));
+                        desc, WeatherUtil.formatTemperature(context, high),
+                        WeatherUtil.formatTemperature(context, low));
 
                 final Intent nextIntent = new Intent(getContext(), MainActivity.class);
                 nextIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

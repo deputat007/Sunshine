@@ -2,68 +2,21 @@ package com.deputat.sunshine.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.text.format.Time;
 
 import com.deputat.sunshine.R;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
-public class Utility {
-    public static String getLocationId(Context context) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        return prefs.getString(context.getString(R.string.pref_location_id),
-                context.getString(R.string.pref_location_id_default));
-    }
-
-    public static String getCoordLon(Context context) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        return prefs.getString(context.getString(R.string.pref_coord_lon),
-                context.getString(R.string.pref_coord_lon_default));
-    }
-
-    public static String getCoordLat(Context context) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        return prefs.getString(context.getString(R.string.pref_coord_lat),
-                context.getString(R.string.pref_coord_lat_default));
-    }
-
-    private static boolean isMetric(Context context) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        return prefs.getString(context.getString(R.string.pref_units_key),
-                context.getString(R.string.pref_units_metric))
-                .equals(context.getString(R.string.pref_units_metric));
-    }
-
-    public static boolean isLocationDetectionEnabled(Context context) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        return prefs.getBoolean(context.getString(R.string.pref_enable_location_detection_key),
-                true);
-    }
-
+public class WeatherUtil {
     @SuppressLint("StringFormatInvalid")
     public static String formatTemperature(Context context, double temperature) {
-        if (!isMetric(context)) {
+        if (!SharedPreferenceUtil.isMetric(context)) {
             temperature = (temperature * 1.8) + 32;
         }
 
         return String.format(context.getString(R.string.format_temperature), temperature);
-    }
-
-    @SuppressWarnings("unused")
-    static String formatDate(long dateInMillis) {
-        final Date date = new Date(dateInMillis);
-
-        return DateFormat.getDateInstance().format(date);
     }
 
     @SuppressLint({"StringFormatMatches", "StringFormatInvalid"})
@@ -127,7 +80,7 @@ public class Utility {
     public static String getFormattedWind(Context context, double windSpeed, double degrees) {
         int windFormat;
 
-        if (Utility.isMetric(context)) {
+        if (SharedPreferenceUtil.isMetric(context)) {
             windFormat = R.string.format_wind_kmh;
         } else {
             windFormat = R.string.format_wind_mph;

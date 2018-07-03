@@ -13,11 +13,11 @@
         android:baselineAligned="false"
         android:divider="?android:attr/dividerHorizontal"
         android:orientation="horizontal"
-        tools:context=".MainActivity">
+        tools:context=".activities.MainActivity">
 
         <fragment
             android:id="@+id/fragment_forecast"
-            android:name="com.deputat.sunshine.ForecastFragment"
+            android:name="com.deputat.sunshine.fragments.ForecastFragment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"

@@ -23,8 +23,8 @@ public class SettingsItem extends LinearLayout {
     private TextView mTextViewTitle;
     private Switch mSwitch;
 
-    private String key;
-    private String defaultValue;
+    private String mKey;
+    private String mDefaultValue;
 
     public SettingsItem(Context context) {
         super(context);
@@ -72,8 +72,8 @@ public class SettingsItem extends LinearLayout {
 
         int switchVisibility = a.getInt(R.styleable.SettingsItem_switchVisibility, 2);
 
-        key = a.getString(R.styleable.SettingsItem_key);
-        defaultValue = a.getString(R.styleable.SettingsItem_defaultValue);
+        mKey = a.getString(R.styleable.SettingsItem_key);
+        mDefaultValue = a.getString(R.styleable.SettingsItem_defaultValue);
 
         a.recycle();
 
@@ -133,10 +133,10 @@ public class SettingsItem extends LinearLayout {
     }
 
     public String getKey() {
-        return key;
+        return mKey;
     }
 
     public String getDefaultValue() {
-        return defaultValue;
+        return mDefaultValue;
     }
 }

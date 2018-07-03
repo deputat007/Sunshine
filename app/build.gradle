@@ -30,6 +30,7 @@ ext {
     eventbusVersion = '3.1.1'
     junitVersion = '4.12'
     firebaseVersion = '16.0.1'
+    brvahVersion = '2.9.40'
 }
 
 dependencies {
@@ -44,6 +45,9 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:${supportVersion}"
     implementation "com.google.firebase:firebase-core:${firebaseVersion}"
     implementation "com.google.firebase:firebase-database:${firebaseVersion}"
+
+    // RecyclerView Adapter helper
+    implementation "com.github.CymChad:BaseRecyclerViewAdapterHelper:${brvahVersion}"
 
     // Gson
     // https://mvnrepository.com/artifact/com.google.code.gson/gson

@@ -1,25 +1,31 @@
-package com.deputat.sunshine;
+package com.deputat.sunshine.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.deputat.sunshine.R;
+import com.deputat.sunshine.fragments.DetailFragment;
+
 import java.util.Objects;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends BaseActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    protected int getContentView() {
+        return R.layout.activity_detail;
+    }
 
+    @Override
+    protected void initUI() {
+    }
+
+    @Override
+    protected void setUI(final Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             final DetailFragment detailFragment = new DetailFragment();
             final Bundle arguments = new Bundle();
@@ -50,6 +56,14 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void configureToolbar(@NonNull final Toolbar toolbar) {
+        super.configureToolbar(toolbar);
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 }
 
