@@ -45,17 +45,6 @@
                 android:value=".activities.MainActivity" />
         </activity>
 
-        <activity
-            android:name=".activities.CitiesActivity"
-            android:label="@string/title_activity_cities"
-            android:parentActivityName=".activities.SettingsActivity"
-            android:theme="@style/ForecastTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.SettingsActivity" />
-
-        </activity>
-
         <provider
             android:name=".data.WeatherProvider"
             android:authorities="com.deputat.android.sunshine.app"
@@ -85,5 +74,9 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBNUl_mmyIx4ki493g4s3BsFi3BsSUgt-A" />
     </application>
 </manifest>

@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,9 +21,9 @@ import com.deputat.sunshine.R;
 import com.deputat.sunshine.activities.MainActivity;
 import com.deputat.sunshine.adapters.ForecastAdapter;
 import com.deputat.sunshine.data.WeatherContract;
-import com.deputat.sunshine.events.LocationChangedEvent;
 import com.deputat.sunshine.events.OnForecastItemClickEvent;
 import com.deputat.sunshine.events.OnForecastItemSelectedEvent;
+import com.deputat.sunshine.events.OnLocationChangedEvent;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
 import com.deputat.sunshine.utils.SharedPreferenceUtil;
 
@@ -68,20 +69,33 @@ public class ForecastFragment extends BaseFragment implements LoaderManager.Load
     private ForecastAdapter mAdapter;
 
     private int mPosition = INVALID_POSITION;
+    private String mLocationSetting;
 
     public ForecastFragment() {
         setHasOptionsMenu(true);
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onResume() {
+        super.onResume();
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
-        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getLoaderManager().destroyLoader(FORECAST_LOADER);
     }
 
     @Override
     protected int getContentView() {
         return R.layout.fragment_main;
+    }
+
+
+    @Override
+    protected boolean useEventBus() {
+        return true;
     }
 
     @Override
@@ -136,11 +150,11 @@ public class ForecastFragment extends BaseFragment implements LoaderManager.Load
 
     @NonNull
     @Override
-    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        final String locationSetting = SharedPreferenceUtil.getLocationId(getActivity());
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        mLocationSetting = SharedPreferenceUtil.getLocationId(getActivity());
         final String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
         final Uri weatherForLocationUri =
-                WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(locationSetting,
+                WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(mLocationSetting,
                         System.currentTimeMillis());
 
         return new CursorLoader(Objects.requireNonNull(getContext()), weatherForLocationUri,
@@ -148,7 +162,7 @@ public class ForecastFragment extends BaseFragment implements LoaderManager.Load
     }
 
     @Override
-    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
+    public void onLoadFinished(@NonNull Loader<Cursor> loader,
                                Cursor data) {
         mAdapter.swapCursor(data);
         mSwipeRefreshLayout.setRefreshing(false);
@@ -172,16 +186,16 @@ public class ForecastFragment extends BaseFragment implements LoaderManager.Load
     }
 
     @Override
-    public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @SuppressWarnings({"unused"})
     @Subscribe
-    public void onLocationChanged(LocationChangedEvent locationChangedEvent) {
+    public void onLocationChanged(OnLocationChangedEvent onLocationChangedEvent) {
+        mLocationSetting = SharedPreferenceUtil.getLocationId(getActivity());
         updateWeather();
-        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
     @Subscribe
@@ -199,6 +213,7 @@ public class ForecastFragment extends BaseFragment implements LoaderManager.Load
 
     private void updateWeather() {
         SunshineSyncAdapter.syncImmediately(getActivity());
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
     private void openPreferredLocationInMap() {

@@ -1,7 +1,6 @@
 package com.deputat.sunshine.activities;
 
 import android.os.Bundle;
-import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +16,6 @@ import org.greenrobot.eventbus.EventBus;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
-    @CallSuper
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getContentView());

@@ -29,9 +29,11 @@ import com.deputat.sunshine.BuildConfig;
 import com.deputat.sunshine.R;
 import com.deputat.sunshine.activities.MainActivity;
 import com.deputat.sunshine.data.WeatherContract;
+import com.deputat.sunshine.events.OnWeatherForecastUpdatedEvent;
 import com.deputat.sunshine.utils.SharedPreferenceUtil;
 import com.deputat.sunshine.utils.WeatherUtil;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +44,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Vector;
 
@@ -152,12 +155,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
             final String APPID_PARAM = "APPID";
+            final String LANG = "lang";
             final Uri builtUri = Uri.parse(FORECAST_BASE_URL)
                     .buildUpon()
                     .appendQueryParameter(LON_PARAM, lon)
                     .appendQueryParameter(LAT_PARAM, lat)
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
+                    .appendQueryParameter(LANG, Locale.getDefault().getLanguage())
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
                     .appendQueryParameter(APPID_PARAM, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
                     .build();
@@ -362,6 +367,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         final Context context = getContext();
         final String enableNotificationKey = context.getString(R.string.pref_enable_notifications_key);
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        EventBus.getDefault().post(new OnWeatherForecastUpdatedEvent());
         final boolean enableNotification = prefs.getBoolean(enableNotificationKey, true);
 
         if (!enableNotification) {

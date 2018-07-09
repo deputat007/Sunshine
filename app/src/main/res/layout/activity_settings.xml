@@ -56,7 +56,6 @@
                     android:focusable="true"
                     app:defaultValue="@string/pref_city_default"
                     app:key="@string/pref_location_id"
-                    app:subtitleText="@string/pref_city_default"
                     app:subtitleVisibility="visible"
                     app:titleText="@string/pref_city_label" />
 
