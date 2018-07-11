@@ -1,63 +1,54 @@
 package com.deputat.sunshine.utils;
 
-import android.Manifest;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.content.Context;
 import android.location.Location;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 
 import com.deputat.sunshine.R;
-import com.deputat.sunshine.activities.MainActivity;
-import com.deputat.sunshine.events.OnLocationChangedEvent;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.deputat.sunshine.application.Constants;
 
-import org.greenrobot.eventbus.EventBus;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
- * Created by Andriy Deputat email(andriy.deputat@gmail.com) on 7/9/18
+ * Created by Andriy Deputat email(andriy.deputat@gmail.com) on 7/11/18
  */
 public class LocationUtil {
-    public static void updateLastLocation(final AppCompatActivity context) {
-        if (!SharedPreferenceUtil.isLocationDetectionEnabled(context)) {
-            return;
-        }
-        if (ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    /**
+     * Returns true if requesting location updates, otherwise returns false.
+     *
+     * @param context The {@link Context}.
+     */
+    public static boolean requestingLocationUpdates(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(Constants.KEY_REQUESTING_LOCATION_UPDATES, false);
+    }
 
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                ActivityCompat.requestPermissions(context,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MainActivity.PERMISSIONS_REQUEST_LOCATION);
-            }
-        } else {
-            final FusedLocationProviderClient fusedLocationClient =
-                    LocationServices.getFusedLocationProviderClient(context);
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(context, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                final SharedPreferences preferences = PreferenceManager
-                                        .getDefaultSharedPreferences(context);
-                                preferences.edit()
-                                        .putString(context.getString(R.string.pref_coord_lat),
-                                                String.valueOf(location.getLatitude()))
-                                        .putString(context.getString(R.string.pref_coord_lon),
-                                                String.valueOf(location.getLongitude()))
-                                        .apply();
+    /**
+     * Stores the location updates state in SharedPreferences.
+     *
+     * @param requestingLocationUpdates The location updates state.
+     */
+    public static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(Constants.KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates)
+                .apply();
+    }
 
-                                EventBus.getDefault().post(new OnLocationChangedEvent());
-                            }
-                        }
-                    });
-        }
+    /**
+     * Returns the {@code location} object as a human readable string.
+     *
+     * @param location The {@link Location}.
+     */
+    public static String getLocationText(Location location) {
+        return location == null ? "Unknown location" :
+                "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
+    }
+
+    public static String getLocationTitle(Context context) {
+        return context.getString(R.string.location_updated,
+                new SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(new Date()));
     }
 }

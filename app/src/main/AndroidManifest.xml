@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".application.SunshineApplication"
@@ -75,6 +75,12 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <service
+            android:name=".LocationUpdatesService"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedService" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

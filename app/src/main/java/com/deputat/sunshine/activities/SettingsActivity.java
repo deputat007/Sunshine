@@ -19,7 +19,6 @@ import com.deputat.sunshine.data.WeatherContract;
 import com.deputat.sunshine.events.OnLocationChangedEvent;
 import com.deputat.sunshine.events.OnWeatherForecastUpdatedEvent;
 import com.deputat.sunshine.sync.SunshineSyncAdapter;
-import com.deputat.sunshine.utils.LocationUtil;
 import com.deputat.sunshine.utils.SharedPreferenceUtil;
 import com.deputat.sunshine.views.SettingsItem;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -169,7 +168,6 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                 mSettingsItemEnableLocationDetection.setSubtitleText(enableLocationDetection ?
                         R.string.pref_enable_location_detection_true :
                         R.string.pref_enable_location_detection_false);
-                LocationUtil.updateLastLocation(this);
                 break;
             case R.id.si_enable_notification:
                 boolean enableNotification = !mSettingsItemEnableNotification.isSwitchChecked();

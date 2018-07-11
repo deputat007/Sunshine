@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 27
@@ -32,10 +31,6 @@ ext {
     firebaseVersion = '16.0.1'
     brvahVersion = '2.9.40'
 }
-realm {
-    syncEnabled = true
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
