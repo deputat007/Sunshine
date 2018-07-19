@@ -1,20 +1,21 @@
 package com.deputat.sunshine.events;
 
 public class OnForecastItemClickEvent {
-    private final long mDate;
-    private final int mPosition;
 
-    public OnForecastItemClickEvent(long date, int position) {
-        this.mDate = date;
-        this.mPosition = position;
-    }
+  private final long date;
+  private final int position;
+
+  public OnForecastItemClickEvent(long date, int position) {
+    this.date = date;
+    this.position = position;
+  }
 
 
-    public long getDate() {
-        return mDate;
-    }
+  public long getDate() {
+    return date;
+  }
 
-    public int getPosition() {
-        return mPosition;
-    }
+  public int getPosition() {
+    return position;
+  }
 }

@@ -7,51 +7,53 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import com.deputat.sunshine.R;
-
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class SpinnerDialog {
 
-    private Dialog mAlertDialog;
+  private Dialog alertDialog;
 
-    public SpinnerDialog(Activity activity) {
-        initView(activity);
+  public SpinnerDialog(Activity activity) {
+    initView(activity);
+  }
+
+  @SuppressLint("InflateParams")
+  private void initView(Activity activity) {
+    final LayoutInflater inflater = (LayoutInflater)
+        activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    final View layout = Objects.requireNonNull(inflater)
+        .inflate(R.layout.progress_dialog, null, false);
+
+    alertDialog = new Dialog(activity);
+    alertDialog.setCanceledOnTouchOutside(false);
+    alertDialog.setCancelable(false);
+    alertDialog.setContentView(layout);
+
+    if (alertDialog.getWindow() != null) {
+      alertDialog.getWindow().setBackgroundDrawable(
+          new ColorDrawable(android.graphics.Color.TRANSPARENT));
     }
+  }
 
-    @SuppressLint("InflateParams")
-    private void initView(Activity activity) {
-        final LayoutInflater inflater = (LayoutInflater)
-                activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View layout = Objects.requireNonNull(inflater)
-                .inflate(R.layout.progress_dialog, null, false);
-
-        mAlertDialog = new Dialog(activity);
-        mAlertDialog.setCanceledOnTouchOutside(false);
-        mAlertDialog.setCancelable(false);
-        mAlertDialog.setContentView(layout);
-
-        if (mAlertDialog.getWindow() != null) {
-            mAlertDialog.getWindow().setBackgroundDrawable(
-                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
+  /**
+   * Show alert dialog.
+   */
+  public void show() {
+    if (alertDialog != null && alertDialog.isShowing()) {
+      hide();
     }
-
-    public void show() {
-        if (mAlertDialog != null && mAlertDialog.isShowing()) {
-            hide();
-        }
-        if (mAlertDialog != null && !mAlertDialog.isShowing()) {
-            mAlertDialog.show();
-        }
+    if (alertDialog != null && !alertDialog.isShowing()) {
+      alertDialog.show();
     }
+  }
 
-    private void hide() {
-        mAlertDialog.dismiss();
-    }
+  private void hide() {
+    alertDialog.dismiss();
+  }
 
-    public boolean isShowing() {
-        return mAlertDialog.isShowing();
-    }
+  public boolean isShowing() {
+    return alertDialog.isShowing();
+  }
 }

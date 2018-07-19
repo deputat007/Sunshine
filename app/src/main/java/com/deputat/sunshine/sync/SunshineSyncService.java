@@ -5,21 +5,22 @@ import android.content.Intent;
 import android.os.IBinder;
 
 public class SunshineSyncService extends Service {
-    private static final Object sSyncAdapterLock = new Object();
-    private static SunshineSyncAdapter sSunshineSyncAdapter = null;
 
-    @Override
-    public void onCreate() {
-        synchronized (sSyncAdapterLock) {
-            if (sSunshineSyncAdapter == null) {
-                sSunshineSyncAdapter = new SunshineSyncAdapter(getApplicationContext(),
-                        true);
-            }
-        }
-    }
+  private static final Object syncAdapterLock = new Object();
+  private static SunshineSyncAdapter sunshineSyncAdapter = null;
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return sSunshineSyncAdapter.getSyncAdapterBinder();
+  @Override
+  public void onCreate() {
+    synchronized (syncAdapterLock) {
+      if (sunshineSyncAdapter == null) {
+        sunshineSyncAdapter = new SunshineSyncAdapter(getApplicationContext(),
+            true);
+      }
     }
+  }
+
+  @Override
+  public IBinder onBind(Intent intent) {
+    return sunshineSyncAdapter.getSyncAdapterBinder();
+  }
 }

@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@drawable/today_touch_selector"
+  android:baselineAligned="false"
+  android:gravity="center_vertical"
+  android:minHeight="?android:attr/listPreferredItemHeight"
+  android:orientation="horizontal">
+
+  <LinearLayout
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/today_touch_selector"
-    android:baselineAligned="false"
+    android:layout_weight="7"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="60dp"
     android:gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:orientation="horizontal">
+    android:orientation="vertical"
+    tools:ignore="RtlHardcoded">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="60dp"
-        android:layout_marginTop="16dp"
-        android:layout_weight="7"
-        android:gravity="center_vertical"
-        android:orientation="vertical"
-        tools:ignore="RtlHardcoded">
+    <TextView
+      android:id="@+id/list_item_date_textview"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:fontFamily="sans-serif-condensed"
+      android:textAppearance="?android:textAppearanceLarge"
+      android:textColor="@color/white"
+      tools:text="Today, June 18"/>
 
-        <TextView
-            android:id="@+id/list_item_date_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/white"
-            tools:text="Today, June 18" />
+    <TextView
+      android:id="@+id/list_item_city_name"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:fontFamily="sans-serif-condensed"
+      android:textAppearance="?android:textAppearanceLarge"
+      android:textColor="@color/white"
+      tools:text="Ivano-Frankivsk"/>
 
-        <TextView
-            android:id="@+id/list_item_city_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/white"
-            tools:text="Ivano-Frankivsk" />
+    <TextView
+      android:id="@+id/list_item_high_textview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:fontFamily="sans-serif-light"
+      android:textColor="@color/white"
+      android:textSize="72sp"
+      tools:text="22'"/>
 
-        <TextView
-            android:id="@+id/list_item_high_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/white"
-            android:textSize="72sp"
-            tools:text="22'" />
+    <TextView
+      android:id="@+id/list_item_low_textview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:fontFamily="sans-serif-light"
+      android:textColor="@color/white"
+      android:textSize="36sp"
+      tools:text="12'"/>
+  </LinearLayout>
 
-        <TextView
-            android:id="@+id/list_item_low_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/white"
-            android:textSize="36sp"
-            tools:text="12'" />
-    </LinearLayout>
+  <LinearLayout
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="5"
+    android:gravity="center_vertical|bottom"
+    android:orientation="vertical"
+    tools:ignore="UseCompoundDrawables">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="5"
-        android:gravity="center_vertical|bottom"
-        android:orientation="vertical"
-        tools:ignore="UseCompoundDrawables">
+    <ImageView
+      android:id="@+id/list_item_icon"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:contentDescription="@string/content_description_icon"
+      tools:src="@drawable/art_clear"/>
 
-        <ImageView
-            android:id="@+id/list_item_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/content_description_icon"
-            tools:src="@drawable/art_clear" />
-
-        <TextView
-            android:id="@+id/list_item_forecast_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:fontFamily="sans-serif-condensed"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/white"
-            tools:text="Clear" />
-    </LinearLayout>
+    <TextView
+      android:id="@+id/list_item_forecast_textview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal|bottom"
+      android:fontFamily="sans-serif-condensed"
+      android:textAppearance="?android:textAppearanceLarge"
+      android:textColor="@color/white"
+      tools:text="Clear"/>
+  </LinearLayout>
 </LinearLayout>

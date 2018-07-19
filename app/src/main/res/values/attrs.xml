@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SettingsItem">
-        <attr name="titleText" format="string" />
-        <attr name="titleColor" format="color" />
-        <attr name="titleSize" format="dimension" />
-        <attr name="key" format="string" />
-        <attr name="defaultValue" format="string" />
+  <declare-styleable name="SettingsItem">
+    <attr format="string" name="titleText"/>
+    <attr format="color" name="titleColor"/>
+    <attr format="dimension" name="titleSize"/>
+    <attr format="string" name="key"/>
+    <attr format="string" name="defaultValue"/>
 
-        <attr name="subtitleText" format="string" />
-        <attr name="subtitleColor" format="color" />
-        <attr name="subtitleSize" format="dimension" />
-        <attr name="subtitleVisibility" format="enum">
-            <enum name="visible" value="0" />
-            <enum name="invisible" value="1" />
-            <enum name="gone" value="2" />
-        </attr>
+    <attr format="string" name="subtitleText"/>
+    <attr format="color" name="subtitleColor"/>
+    <attr format="dimension" name="subtitleSize"/>
+    <attr format="enum" name="subtitleVisibility">
+      <enum name="visible" value="0"/>
+      <enum name="invisible" value="1"/>
+      <enum name="gone" value="2"/>
+    </attr>
 
-        <attr name="switchVisibility" format="enum">
-            <enum name="visible" value="0" />
-            <enum name="invisible" value="1" />
-            <enum name="gone" value="2" />
-        </attr>
-    </declare-styleable>
+    <attr format="enum" name="switchVisibility">
+      <enum name="visible" value="0"/>
+      <enum name="invisible" value="1"/>
+      <enum name="gone" value="2"/>
+    </attr>
+  </declare-styleable>
 </resources>

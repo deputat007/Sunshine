@@ -3,13 +3,14 @@ package com.deputat.sunshine.events;
 import android.net.Uri;
 
 public class OnForecastItemSelectedEvent {
-    private final Uri mDateUri;
 
-    public OnForecastItemSelectedEvent(Uri dateUri) {
-        this.mDateUri = dateUri;
-    }
+  private final Uri dateUri;
 
-    public Uri getDateUri() {
-        return mDateUri;
-    }
+  public OnForecastItemSelectedEvent(Uri dateUri) {
+    this.dateUri = dateUri;
+  }
+
+  public Uri getDateUri() {
+    return dateUri;
+  }
 }
